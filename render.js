@@ -18,22 +18,21 @@ function renderer(config) {
     };
 
     function renderFrame() {
-        requestAnimationFrame(renderFrame);
         ctx.clearRect(0, 0, buffer.width, buffer.height);
 
         for(var i = 0; i < contents.length; i++) {
             var args = contents[i] || {};
-            var name = args.op || 'noop';
-            var op = ops[name] || ops.noop;
+            var op = ops[args.op || 'noop'];
             if (op) {
-                ctx.fillStyle = (op.color || op.fill || color)
-                ctx.strokeStyle = (op.color || op.stroke || color);
+                ctx.fillStyle   = (args.color || args.fill   || color);
+                ctx.strokeStyle = (args.color || args.stroke || color);
                 op.apply(null, args);
             }
         }
 
         outerCtx.clearRect(0, 0, canvas.width, canvas.height);
         outerCtx.drawImage(buffer, 0, 0);
+        requestAnimationFrame(renderFrame);
     }
 
     requestAnimationFrame(renderFrame);
