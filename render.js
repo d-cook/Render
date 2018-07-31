@@ -18,7 +18,19 @@ function renderer(config) {
     if (config.height) { buffer.height = canvas.height = config.height; }
 
     var ops = {
-        line: function line(args) { }
+        line: function line(args) {
+            ctx.moveTo(xof(args.x1), yof(args.y1));
+            ctx.lineTo(xof(args.x2), yof(args.y2));
+            ctx.stroke();
+        },
+        rect: function rect(args) {
+            if (args.fill || !args.stroke) { ctx.fillRect  (xof(args.x,     args.w  ), yof(args.y,     args.h  ), args.w,   args.h  ); }
+            if (/***********/ args.stroke) { ctx.strokeRect(xof(args.x+0.5, args.w-1), yof(args.y+0.5, args.h-1), args.w-1, args.h-1); }
+        },
+        clearRect: function rect(args) {
+            if (/******************/ true) { ctx.clearRect (xof(args.x,     args.w  ), yof(args.y,     args.h  ), args.w  , args.h  ); }
+            if (/***********/ args.stroke) { ctx.strokeRect(xof(args.x+0.5, args.w-1), yof(args.y+0.5, args.h-1), args.w-1, args.h-1); }
+        },
     };
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
