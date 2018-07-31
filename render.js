@@ -9,6 +9,10 @@ function renderer(config) {
     var content  = config.content || [];
     var ctx      = buffer.getContext('2d');
     var outerCtx = canvas.getContext('2d');
+    var dx       = (baseX === 'right' ? -1 : +1);
+    var dy       = (baseY === 'top'   ? +1 : -1);
+    var originX  = 0;
+    var originY  = 0;
 
     if (config.width ) { buffer.width  = canvas.width  = config.width;  }
     if (config.height) { buffer.height = canvas.height = config.height; }
@@ -17,7 +21,16 @@ function renderer(config) {
         line: function line(args) { }
     };
 
+    function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
+    function yof(y, h) { return originY + dy * (dy > 0 ? y : y + (h||0)); }
+
+    function setOrigin() {
+        originX = (baseX === 'left') ? 0 : (baseX === 'right' ) ? canvas.width  : Math.floor(canvas.width  / 2);
+        originY = (baseY === 'top' ) ? 0 : (baseY === 'bottom') ? canvas.height : Math.floor(canvas.height / 2);
+    }
+
     function renderFrame() {
+        setOrigin();
         ctx.clearRect(0, 0, buffer.width, buffer.height);
 
         for(var i = 0; i < contents.length; i++) {
