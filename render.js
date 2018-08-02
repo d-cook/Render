@@ -45,13 +45,13 @@ function renderer(config) {
         setOrigin();
         ctx.clearRect(0, 0, buffer.width, buffer.height);
 
-        for(var i = 0; i < contents.length; i++) {
-            var args = contents[i] || {};
+        for(var i = 0; i < content.length; i++) {
+            var args = content[i] || {};
             var op = ops[args.op || 'noop'];
             if (op) {
                 ctx.fillStyle   = (args.color || args.fill   || color);
                 ctx.strokeStyle = (args.color || args.stroke || color);
-                op.apply(null, args);
+                op(args);
             }
         }
 
