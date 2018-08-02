@@ -19,8 +19,8 @@ function renderer(config) {
 
     var ops = {
         line: function line(args) {
-            ctx.moveTo(xof(args.x1), yof(args.y1));
-            ctx.lineTo(xof(args.x2), yof(args.y2));
+            ctx.moveTo(xof(args.x1+0.5), yof(args.y1+0.5));
+            ctx.lineTo(xof(args.x2+0.5), yof(args.y2+0.5));
             ctx.stroke();
         },
         rect: function rect(args) {
@@ -43,6 +43,8 @@ function renderer(config) {
 
     function renderFrame() {
         setOrigin();
+        buffer.width--; buffer.width++;
+        canvas.width--; canvas.width++;
         ctx.clearRect(0, 0, buffer.width, buffer.height);
 
         for(var i = 0; i < content.length; i++) {
@@ -63,8 +65,8 @@ function renderer(config) {
     requestAnimationFrame(renderFrame);
 
     return {
-        render: function render(c) { content = c; },
-        resize: function resize(w, h) { buffer.width = canvas.width  = w; buffer.height = canvas.height = h; },
-        getCanvas: function getCanvas() { return canvas; }
+        getCanvas: function getCanvas( ) { return canvas; },
+        resize   : function resize(w, h) { buffer.width = canvas.width = w; buffer.height = canvas.height = h; },
+        render   : function render(c   ) { content = c || content; }
     };
 }
