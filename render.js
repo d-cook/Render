@@ -99,9 +99,17 @@ function renderer(config, width, height) {
     renderFrame();
 
     return {
-        getCanvas: function getCanvas( ) { return canvas; },
-        render   : function render(c   ) { content = c || content; renderFrame(); },
-        resize   : function resize(w, h) {
+        getCanvas: function getCanvas() {
+            return canvas;
+        },
+        render: function render(c) {
+            if (arguments.length > 0) {
+                if (!isArray(c)) { var c2 = []; c2.push.apply(c2, arguments); c = c2; }
+                content = isArray(c[0]) ? c : [c];
+            }
+            renderFrame();
+        },
+        resize: function resize(w, h) {
             buffer.width = canvas.width  = w;
             buffer.height = canvas.height = h;
             renderFrame();
