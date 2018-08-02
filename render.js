@@ -37,19 +37,14 @@ function renderer(config, width, height) {
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
     var ops = {
-        line: function line(args) {
-            ctx.moveTo(xof(args.x1+0.5), yof(args.y1+0.5));
-            ctx.lineTo(xof(args.x2+0.5), yof(args.y2+0.5));
+        line: function line(x1, y1, x2, y2) {
+            ctx.moveTo(xof(x1+0.5), yof(y1+0.5));
+            ctx.lineTo(xof(x2+0.5), yof(y2+0.5));
             ctx.stroke();
         },
-        rect: function rect(args) {
-            if (args.fill || !args.stroke) { ctx.fillRect  (xof(args.x,     args.w  ), yof(args.y,     args.h  ), args.w,   args.h  ); }
-            if (/***********/ args.stroke) { ctx.strokeRect(xof(args.x+0.5, args.w-1), yof(args.y+0.5, args.h-1), args.w-1, args.h-1); }
-        },
-        clearRect: function rect(args) {
-            if (/******************/ true) { ctx.clearRect (xof(args.x,     args.w  ), yof(args.y,     args.h  ), args.w  , args.h  ); }
-            if (/***********/ args.stroke) { ctx.strokeRect(xof(args.x+0.5, args.w-1), yof(args.y+0.5, args.h-1), args.w-1, args.h-1); }
-        },
+        rect:      function rect     (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
+        solidrect: function solidrect(x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
+        clear:     function clearRect(x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); },
     };
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
@@ -66,13 +61,27 @@ function renderer(config, width, height) {
         canvas.width--; canvas.width++;
         ctx.clearRect(0, 0, buffer.width, buffer.height);
 
-        for(var i = 0; i < content.length; i++) {
-            var args = content[i] || {};
-            var op = ops[args.op || 'noop'];
+        for(var ci = 0; ci < content.length; ci++) {
+            var data = content[ci] || ['noop'];
+            var ids = ('' + (data[0] || '')).toLowerCase().split(' ');
+            var op = null, sop = null, solid = false, color = null;
+
+            for (var i = 0; i < ids.length; i++) {
+                var id = ids[i];
+                var o  = ops[id];
+                var so = ops['solid'+id];
+                op     = (op    || o);
+                sop    = (sop   || so);
+                solid  = (solid || (o === 'solid'));
+                color  = (color || (!o && !so && id));
+            }
+
+            op = (solid && sop) || op || sop;
             if (op) {
-                ctx.fillStyle   = (args.color || args.fill   || color);
-                ctx.strokeStyle = (args.color || args.stroke || color);
-                op(args);
+                var args = data.slice(1);
+                ctx.fillStyle   = (color || defColor);
+                ctx.strokeStyle = (color || defColor);
+                op.apply(null, args);
             }
         }
 
