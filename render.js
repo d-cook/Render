@@ -57,16 +57,21 @@ function renderer(config) {
             }
         }
 
-        outerCtx.clearRect(0, 0, canvas.width, canvas.height);
-        outerCtx.drawImage(buffer, 0, 0);
-        requestAnimationFrame(renderFrame);
+        requestAnimationFrame(function renderBuffer() {
+            outerCtx.clearRect(0, 0, canvas.width, canvas.height);
+            outerCtx.drawImage(buffer, 0, 0);
+        });
     }
 
-    requestAnimationFrame(renderFrame);
+    renderFrame();
 
     return {
         getCanvas: function getCanvas( ) { return canvas; },
-        resize   : function resize(w, h) { buffer.width = canvas.width = w; buffer.height = canvas.height = h; },
-        render   : function render(c   ) { content = c || content; }
+        render   : function render(c   ) { content = c || content; renderFrame(); },
+        resize   : function resize(w, h) {
+            buffer.width = canvas.width  = w;
+            buffer.height = canvas.height = h;
+            renderFrame();
+        },
     };
 }
