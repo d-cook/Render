@@ -1,21 +1,40 @@
-function renderer(config) {
-    config = config || {};
+function renderer(config, width, height) {
+    if ((typeof config) !== 'string') { var x = config; config = width;  width  = x; }
+    if ((typeof config) !== 'string') { var x = config; config = height; height = x; }
 
-    var buffer   = /***************/ document.createElement('canvas');
-    var canvas   = config.canvas  || document.createElement('canvas');
-    var baseY    = config.baseY   || 'middle' || 'top'  || 'bottom';
-    var baseX    = config.baseX   || 'middle' || 'left' || 'right';
-    var color    = config.color   || 'black';
-    var content  = config.content || [];
+    var baseX, baseY, defColor;
+
+    (function() {
+        var ids = ('' + (config || '')).toLowerCase().split(' ');
+        var T = null, L = null, R = null, B = null, M = 0, C = null;
+
+        for (var i = 0; i < ids.length; i++) {
+            var id = ids[i];
+            var t = (id === 'top'   ); T = T || (t && !B);
+            var l = (id === 'left'  ); L = L || (l && !R);
+            var r = (id === 'right' ); R = R || (r && !L);
+            var b = (id === 'bottom'); B = B || (b && !T);
+            var m = (id === 'middle' || id === 'center');
+            C = (t || l || r || b || m) ? C : id;
+        }
+
+        baseX = (L) ? 'left' : (R) ? 'right' : 'middle';
+        baseY = (T) ? 'top' : (B) ? 'bottom' : 'middle';
+        defColor = C || 'black';
+    }());
+
+    var buffer   = document.createElement('canvas');
+    var canvas   = document.createElement('canvas');
     var ctx      = buffer.getContext('2d');
     var outerCtx = canvas.getContext('2d');
     var dx       = (baseX === 'right' ? -1 : +1);
     var dy       = (baseY === 'top'   ? +1 : -1);
     var originX  = 0;
     var originY  = 0;
+    var content  = [];
 
-    if (config.width ) { buffer.width  = canvas.width  = config.width;  }
-    if (config.height) { buffer.height = canvas.height = config.height; }
+    buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
+    buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
     var ops = {
         line: function line(args) {
@@ -61,6 +80,11 @@ function renderer(config) {
             outerCtx.clearRect(0, 0, canvas.width, canvas.height);
             outerCtx.drawImage(buffer, 0, 0);
         });
+    }
+
+    function isArray(a) {
+        var s = Object.prototype.toString.call(a);
+        return (s === '[object Array]' || s === '[object Arguments]');
     }
 
     renderFrame();
