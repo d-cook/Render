@@ -37,13 +37,9 @@ function renderer(config, width, height) {
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
     var ops = {
-        line: function line(x1, y1, x2, y2) {
-            ctx.moveTo(xof(x1+0.5), yof(y1+0.5));
-            for(var i = 2; i < arguments.length - 1; i += 2) {
-                ctx.lineTo(xof(arguments[i]+0.5), yof(arguments[i+1]+0.5));
-            }
-            ctx.stroke();
-        },
+        line:      function line     (/*..xi,yi..*/) { path(arguments, 0, 0); },
+        poly:      function poly     (/*..xi,yi..*/) { path(arguments, 1, 0); },
+        solidpoly: function solidpoly(/*..xi,yi..*/) { path(arguments, 1, 1); },
         rect:      function rect     (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
         solidrect: function solidrect(x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
         clear:     function clearrect(x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); },
@@ -51,6 +47,15 @@ function renderer(config, width, height) {
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
     function yof(y, h) { return originY + dy * (dy > 0 ? y : y + (h||0)); }
+
+    function path(args, close, fill) {
+        ctx.moveTo(xof(args[0]+0.5), yof(args[1]+0.5));
+        for(var i = 2; i < args.length - 1; i += 2) {
+            ctx.lineTo(xof(args[i]+0.5), yof(args[i+1]+0.5));
+        }
+        if (close) { ctx.closePath(); }
+        ctx[fill ? 'fill' : 'stroke']();
+    }
 
     function setOrigin() {
         originX = (baseX === 'left') ? 0 : (baseX === 'right' ) ? canvas.width  : Math.floor(canvas.width  / 2);
