@@ -70,10 +70,11 @@ function renderer(config, width, height) {
                 var id = ids[i];
                 var o  = ops[id];
                 var so = ops['solid'+id];
+                var sd = (id === 'solid');
                 op     = (op    || o);
                 sop    = (sop   || so);
-                solid  = (solid || (o === 'solid'));
-                color  = (color || (!o && !so && id));
+                solid  = (solid || sd);
+                color  = (color || (!o && !so && !sd && id));
             }
 
             op = (solid && sop) || op || sop;
