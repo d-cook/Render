@@ -39,12 +39,14 @@ function renderer(config, width, height) {
     var ops = {
         line: function line(x1, y1, x2, y2) {
             ctx.moveTo(xof(x1+0.5), yof(y1+0.5));
-            ctx.lineTo(xof(x2+0.5), yof(y2+0.5));
+            for(var i = 2; i < arguments.length - 1; i += 2) {
+                ctx.lineTo(xof(arguments[i]+0.5), yof(arguments[i+1]+0.5));
+            }
             ctx.stroke();
         },
         rect:      function rect     (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
         solidrect: function solidrect(x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
-        clear:     function clearRect(x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); },
+        clear:     function clearrect(x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); },
     };
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
