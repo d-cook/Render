@@ -84,20 +84,25 @@ function renderer(config, width, height) {
         for(var ci = 0; ci < content.length; ci++) {
             var data = content[ci] || ['noop'];
             var ids = ('' + (data[0] || '')).toLowerCase().split(' ');
-            var op = null, sop = null, solid = false, color = null;
+            var solid = false, closed = false, color = null;
+            var op = null, sop = null, cop = null;
 
-            for (var i = 0; i < ids.length; i++) {
+            for(var i = 0; i < ids.length; i++) {
                 var id = ids[i];
                 var o  = ops[id];
                 var so = ops['solid'+id];
+                var co = ops['closed'+id];
                 var sd = (id === 'solid');
-                op     = (op    || o);
-                sop    = (sop   || so);
-                solid  = (solid || sd);
-                color  = (color || (!o && !so && !sd && id));
+                var cd = (id === 'closed');
+                op     = (op     || o);
+                sop    = (sop    || so);
+                cop    = (cop    || co);
+                solid  = (solid  || sd);
+                closed = (closed || cd);
+                color  = (color  || (!o && !so && !co && !sd && !cd && id));
             }
 
-            op = (solid && sop) || op || sop;
+            op = (solid && sop) || (closed && cop) || op;
             if (op) {
                 var args = data.slice(1);
                 ctx.fillStyle   = (color || defColor);
