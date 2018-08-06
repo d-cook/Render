@@ -43,6 +43,9 @@ function renderer(config, width, height) {
         curve:      function curve      (/*..points..*/) { curvePath(arguments, 0, 0); },
         closedcurve:function closedcurve(/*..points..*/) { curvePath(arguments, 1, 0); },
         solidcurve: function solidcurve (/*..points..*/) { curvePath(arguments, 1, 1); },
+        path:       function line       (/*..points..*/) { mixedPath(arguments, 0, 0); },
+        closedpath: function closedpath (/*..points..*/) { mixedPath(arguments, 1, 0); },
+        solidpath:  function solidpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
         rect:       function rect       (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
         solidrect:  function solidrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
         clear:      function clearrect  (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
@@ -74,6 +77,19 @@ function renderer(config, width, height) {
             if (i < args.length - 1) { ctx.quadraticCurveTo(xof(args[i]+d), yof(args[i+1]+d), xof(args[0]+d), yof(args[1]+d)); }
             else { ctx.closePath(); }
         }
+        ctx[fill ? 'fill' : 'stroke']();
+    }
+
+    function mixedPath(args, close, fill) {
+        var d = (fill ? 0 : 0.5);
+        ctx.moveTo(xof(args[0]+d), yof(args[1]+d));
+        for(var i = 2; i < args.length; i++) {
+            var p = args[i];
+            if /**/ (p.length < 4) { ctx.lineTo/*********/(xof(p[0]+d), yof(p[1]+d)); }
+            else if (p.length < 6) { ctx.quadraticCurveTo (xof(p[0]+d), yof(p[1]+d), xof(p[2]+d), yof(p[3]+d)); }
+            else /***************/ { ctx.bezierCurveTo/**/(xof(p[0]+d), yof(p[1]+d), xof(p[2]+d), yof(p[3]+d), xof(p[4]+d), yof(p[5]+d)); }
+        }
+        if (close) { ctx.closePath(); }
         ctx[fill ? 'fill' : 'stroke']();
     }
 
