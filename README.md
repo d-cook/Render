@@ -1,7 +1,7 @@
 # Render
 A Wrapper for HTML5 Canvas for declarative rendering
 
-The idea is to be able to create a UI from a single descriptive dataset, rather than having to create and manage traditional UI components (such as HTML Dom). To update (alter) the UI, one simply provides a new dataset (instead of keeping of modifying & managing a bunch of UI components that all have their own state and behaviors).
+The idea is to be able to create a UI from a single descriptive dataset, rather than having to create and manage traditional UI components (such as HTML Dom). Instead of modifying & managing a bunch of UI components (each with their own state and behaviors), the UI is updated (altered) simply by providing a new / modified dataset.
 
 ## Usage:
 
