@@ -31,9 +31,9 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["poly", x1, y1, x2, y2, ...]` *(like "line", but forms a closed polygon)*
 * `["rect", x, y, width, height]` *(rectangle)*
 * `["clear", x, y, width, height]` *(clear the pixels in the given rectangle)*
-* `["curve", x1, y1, c-x2, c-y2, x2, y2]` *(single quadratic curve)*
-* `["curve", x1, y1, c1-x2, c1-y2, c2-x2, c2-y2, x2, y2]` *(single bezier curve)*
-* `["curve", x1, y1, c-x2, c-y2, x2, y2, ...]` *(each additional (cx, cy, x, y) forms a quad curve)*
+* `["curve", x1, y1, cx, cy, x2, y2]` *(single quadratic curve)*
+* `["curve", x1, y1, c1x, c1y, c2x, c2y, x2, y2]` *(single bezier curve)*
+* `["curve", x1, y1, cx, cy, x2, y2, ...]` *(each additional (cx, cy, x, y) forms a quad curve)*
 * `["path", x1, y1, [...], ...]` *(sequence of lines (x, y) or quad (cx, cy, x, y) or bezier (c1x, c1y, c2x, c2y, x, y) curves)*
 
 **Optional Keywords:**
