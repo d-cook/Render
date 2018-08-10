@@ -34,7 +34,7 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["curve", x1, y1, ctrl-x, ctrl-y, x2, y2]` *(single quadratic curve)*
 * `["curve", x1, y1, ctrl1-x, ctrl1-y, ctrl2-x, ctrl2-y, x2, y2]` *(single bezier curve)*
 * `["curve", x1, y1, ctrl-x, ctrl-y, x2, y2, ...]` *(each additional (cx, cy, x, y) forms a quad curve)*
-* `["path", x1, y1, [...], ...]` *(path of lines (x, y) or quad (cx, cy, x, y) or bezier (c1x, c1y, c2x, c2y, x, y) curves)*
+* `["path", x1, y1, [...], ...]` *(sequence of lines (x, y) or quad (cx, cy, x, y) or bezier (c1x, c1y, c2x, c2y, x, y) curves)*
 
 **Optional Keywords:**
 * solid *(`"solid rect"`)*: The entity will be filled-in (rather than just be outlined).
