@@ -43,12 +43,12 @@ function renderer(config, width, height) {
         curve:      function curve      (/*..points..*/) { curvePath(arguments, 0, 0); },
         closedcurve:function closedcurve(/*..points..*/) { curvePath(arguments, 1, 0); },
         solidcurve: function solidcurve (/*..points..*/) { curvePath(arguments, 1, 1); },
-        path:       function line       (/*..points..*/) { mixedPath(arguments, 0, 0); },
+        path:       function path       (/*..points..*/) { mixedPath(arguments, 0, 0); },
         closedpath: function closedpath (/*..points..*/) { mixedPath(arguments, 1, 0); },
         solidpath:  function solidpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
         rect:       function rect       (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
         solidrect:  function solidrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
-        clear:      function clearrect  (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
+        clear:      function clear      (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
     };
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
