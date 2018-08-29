@@ -88,7 +88,7 @@ function Renderer(config, width, height) {
 
     function _arc(x, y, r, s, e, close, fill, path) {
         var d = (fill ? 0 : 0.5);
-        ctx.arc(xof(x+d), yof(y+d), r, aof(s), aof(e), (dx * dy < 0));
+        ctx.arc(xof(x+d), yof(y+d), r, aof(s), aof(e), (dx * dy * (path || 1)) < 0);
         if (close) { ctx.closePath(); }
         if (!path) { ctx[fill ? 'fill' : 'stroke'](); }
     }
@@ -98,7 +98,7 @@ function Renderer(config, width, height) {
         var y = y0 - cy;
         var r = Math.sqrt(x*x + y*y);
         var s = Math.atan2(y, x);
-        _arc(cx, cy, r, s, s+a, 0, fill, 1);
+        _arc(cx, cy, r, s, s+a, 0, fill, (a > 0 ? 1 : -1));
     }
 
     function mixedPath(args, close, fill) {
