@@ -1,4 +1,4 @@
-function renderer(config, width, height) {
+function Renderer(config, width, height) {
     if ((typeof config) !== 'string') { var x = config; config = width;  width  = x; }
     if ((typeof config) !== 'string') { var x = config; config = height; height = x; }
 
