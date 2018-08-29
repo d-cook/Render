@@ -46,11 +46,11 @@ function Renderer(config, width, height) {
         path:        function path        (/*..points..*/) { mixedPath(arguments, 0, 0); },
         closedpath:  function closedpath  (/*..points..*/) { mixedPath(arguments, 1, 0); },
         filledpath:  function filledpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
-        circle:      function circle      (x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0); },
-        filledcircle:function filledcircle(x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0); },
-        arc:         function arc         (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 0, 0); },
-        closedarc:   function closedarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 0); },
-        filledarc:   function filledarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1); },
+        circle:      function circle      (x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0, 0); },
+        filledcircle:function filledcircle(x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0, 0); },
+        arc:         function arc         (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 0, 0, 0); },
+        closedarc:   function closedarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 0, 0); },
+        filledarc:   function filledarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1, 0); },
         rect:        function rect        (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
         filledrect:  function filledrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
         clear:       function clear       (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
@@ -86,21 +86,34 @@ function Renderer(config, width, height) {
         ctx[fill ? 'fill' : 'stroke']();
     }
 
-    function _arc(x, y, r, s, e, close, fill) {
+    function _arc(x, y, r, s, e, close, fill, path) {
         var d = (fill ? 0 : 0.5);
         ctx.arc(xof(x+d), yof(y+d), r, aof(s), aof(e), (dx * dy < 0));
         if (close) { ctx.closePath(); }
-        ctx[fill ? 'fill' : 'stroke']();
+        if (!path) { ctx[fill ? 'fill' : 'stroke'](); }
+    }
+
+    function arcTo(x0, y0, cx, cy, a, fill) {
+        var x = x0 - cx;
+        var y = y0 - cy;
+        var r = Math.sqrt(x*x + y*y);
+        var s = Math.atan2(y, x);
+        _arc(cx, cy, r, s, s+a, 0, fill, 1);
     }
 
     function mixedPath(args, close, fill) {
         var d = (fill ? 0 : 0.5);
+        var prevX = args[0];
+        var prevY = args[1];
         ctx.moveTo(xof(args[0]+d), yof(args[1]+d));
         for(var i = 2; i < args.length; i++) {
             var p = args[i];
-            if /**/ (p.length < 4) { ctx.lineTo/*********/(xof(p[0]+d), yof(p[1]+d)); }
+            if /**/ (p.length < 3) { ctx.lineTo/*********/(xof(p[0]+d), yof(p[1]+d)); }
+            if /**/ (p.length < 4) { arcTo(prevX, prevY, p[0], p[1], p[2], fill); }
             else if (p.length < 6) { ctx.quadraticCurveTo (xof(p[0]+d), yof(p[1]+d), xof(p[2]+d), yof(p[3]+d)); }
             else /***************/ { ctx.bezierCurveTo/**/(xof(p[0]+d), yof(p[1]+d), xof(p[2]+d), yof(p[3]+d), xof(p[4]+d), yof(p[5]+d)); }
+            prevX = p[p.length - 2];
+            prevY = p[p.length - 1];
         }
         if (close) { ctx.closePath(); }
         ctx[fill ? 'fill' : 'stroke']();
