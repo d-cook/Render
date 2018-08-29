@@ -37,6 +37,6 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["path", x1, y1, [...], ...]` *(sequence of lines (x, y) or quad (cx, cy, x, y) or bezier (c1x, c1y, c2x, c2y, x, y) curves)*
 
 **Optional Keywords:**
-* solid (`"solid rect"`): The entity will be filled-in (rather than just be outlined).
+* filled (`"filled rect"`): The entity will be filled-in (rather than just be outlined).
 * closed (`"closed curve"`): The start & end points are joined to form a "closed" shape.
 * *(any valid color)* (`"blue line"`, `"#0088FF rect"`): The color to render the entity in.

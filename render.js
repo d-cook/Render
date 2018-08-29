@@ -39,15 +39,15 @@ function renderer(config, width, height) {
     var ops = {
         line:       function line       (/*..points..*/) { linePath(arguments, 0, 0); },
         poly:       function poly       (/*..points..*/) { linePath(arguments, 1, 0); },
-        solidpoly:  function solidpoly  (/*..points..*/) { linePath(arguments, 1, 1); },
+        filledpoly: function filledpoly (/*..points..*/) { linePath(arguments, 1, 1); },
         curve:      function curve      (/*..points..*/) { curvePath(arguments, 0, 0); },
         closedcurve:function closedcurve(/*..points..*/) { curvePath(arguments, 1, 0); },
-        solidcurve: function solidcurve (/*..points..*/) { curvePath(arguments, 1, 1); },
+        filledcurve:function filledcurve(/*..points..*/) { curvePath(arguments, 1, 1); },
         path:       function path       (/*..points..*/) { mixedPath(arguments, 0, 0); },
         closedpath: function closedpath (/*..points..*/) { mixedPath(arguments, 1, 0); },
-        solidpath:  function solidpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
+        filledpath: function filledpath (/*..points..*/) { mixedPath(arguments, 1, 1); },
         rect:       function rect       (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
-        solidrect:  function solidrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
+        filledrect: function filledrect (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
         clear:      function clear      (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
     };
 
@@ -107,25 +107,25 @@ function renderer(config, width, height) {
         for(var ci = 0; ci < content.length; ci++) {
             var data = content[ci] || ['noop'];
             var ids = ('' + (data[0] || '')).toLowerCase().split(' ');
-            var solid = false, closed = false, color = null;
-            var op = null, sop = null, cop = null;
+            var filled = false, closed = false, color = null;
+            var op = null, fop = null, cop = null;
 
             for(var i = 0; i < ids.length; i++) {
                 var id = ids[i];
                 var o  = ops[id];
-                var so = ops['solid'+id];
+                var so = ops['filled'+id];
                 var co = ops['closed'+id];
-                var sd = (id === 'solid');
+                var fd = (id === 'filled');
                 var cd = (id === 'closed');
                 op     = (op     || o);
-                sop    = (sop    || so);
+                fop    = (fop    || so);
                 cop    = (cop    || co);
-                solid  = (solid  || sd);
+                filled = (filled || fd);
                 closed = (closed || cd);
-                color  = (color  || (!o && !so && !co && !sd && !cd && id));
+                color  = (color  || (!o && !so && !co && !fd && !cd && id));
             }
 
-            op = (solid && sop) || (closed && cop) || op;
+            op = (filled && fop) || (closed && cop) || op;
             if (op) {
                 var args = data.slice(1);
                 ctx.fillStyle   = (color || defColor);
