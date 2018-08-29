@@ -88,7 +88,6 @@ function Renderer(config, width, height) {
 
     function _arc(x, y, r, s, e, close, fill) {
         var d = (fill ? 0 : 0.5);
-        ctx.beginPath();
         ctx.arc(xof(x+d), yof(y+d), r, aof(s), aof(e), (dx * dy < 0));
         if (close) { ctx.closePath(); }
         ctx[fill ? 'fill' : 'stroke']();
@@ -144,6 +143,7 @@ function Renderer(config, width, height) {
                 var args = data.slice(1);
                 ctx.fillStyle   = (color || defColor);
                 ctx.strokeStyle = (color || defColor);
+                ctx.beginPath();
                 op.apply(null, args);
             }
         }
