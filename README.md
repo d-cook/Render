@@ -36,7 +36,7 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["curve", x1, y1, cx, cy, x2, y2]` *(single quadratic curve)*
 * `["curve", x1, y1, c1x, c1y, c2x, c2y, x2, y2]` *(single bezier curve)*
 * `["curve", x1, y1, cx, cy, x2, y2, ...]` *(each additional (cx, cy, x, y) forms a quad curve)*
-* `["path", x1, y1, [...], ...]` *(sequence of lines (x, y), arcs (x, y, a), quad-curves (cx, cy, x, y), or bezier-curves (c1x, c1y, c2x, c2y, x, y))*
+* `["path", x1, y1, [...], ...]` *(sequence of lines (x, y), arcs (x, y, a), quads (cx, cy, x, y), or beziers (c1x, c1y, c2x, c2y, x, y))*
 
 **Optional Keywords:**
 * filled (`"filled rect"`): The entity will be filled-in (rather than just be outlined).
