@@ -38,5 +38,5 @@ Renders new graphics content. Any previously rendered content is removed (erased
 
 **Optional Keywords:**
 * solid (`"solid rect"`): The entity will be filled-in (rather than just be outlined).
-* closed (`"closed curve"`): The shape is "closed" (currently only applies to curves).
+* closed (`"closed curve"`): The start & end points are joined to form a "closed" shape.
 * *(any valid color)* (`"blue line"`, `"#0088FF rect"`): The color to render the entity in.
