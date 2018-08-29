@@ -27,6 +27,8 @@ Resizes the canvas (in pixels). This also rerenders content (as passed to render
 Renders new graphics content. Any previously rendered content is removed (erased). In other words, each call to render(..) should contain *all* graphics content that the canvas should display. The "keywords" contain the name of the graphical entity to render, and other optional keywords, in any order and separated by spaces. The "arguments" to provide depends on which entity it to be rendered.
 
 **Example entities:**
+* `["circle", x, y, r]` *(circle centered at (x, y) with radius r)*
+* `["arc", x, y, r, s, e]` *(arc of circle ... from **s**tart angle to **e**nd angle (in radians))*
 * `["line", x1, y1, x2, y2, ...]` *(each additional (x, y) forms a line segment from previous point)*
 * `["poly", x1, y1, x2, y2, ...]` *(like "line", but forms a closed polygon)*
 * `["rect", x, y, width, height]` *(rectangle)*

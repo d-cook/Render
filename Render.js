@@ -37,22 +37,28 @@ function Renderer(config, width, height) {
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
     var ops = {
-        line:       function line       (/*..points..*/) { linePath(arguments, 0, 0); },
-        poly:       function poly       (/*..points..*/) { linePath(arguments, 1, 0); },
-        filledpoly: function filledpoly (/*..points..*/) { linePath(arguments, 1, 1); },
-        curve:      function curve      (/*..points..*/) { curvePath(arguments, 0, 0); },
-        closedcurve:function closedcurve(/*..points..*/) { curvePath(arguments, 1, 0); },
-        filledcurve:function filledcurve(/*..points..*/) { curvePath(arguments, 1, 1); },
-        path:       function path       (/*..points..*/) { mixedPath(arguments, 0, 0); },
-        closedpath: function closedpath (/*..points..*/) { mixedPath(arguments, 1, 0); },
-        filledpath: function filledpath (/*..points..*/) { mixedPath(arguments, 1, 1); },
-        rect:       function rect       (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
-        filledrect: function filledrect (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
-        clear:      function clear      (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
+        line:        function line        (/*..points..*/) { linePath(arguments, 0, 0); },
+        poly:        function poly        (/*..points..*/) { linePath(arguments, 1, 0); },
+        filledpoly:  function filledpoly  (/*..points..*/) { linePath(arguments, 1, 1); },
+        curve:       function curve       (/*..points..*/) { curvePath(arguments, 0, 0); },
+        closedcurve: function closedcurve (/*..points..*/) { curvePath(arguments, 1, 0); },
+        filledcurve: function filledcurve (/*..points..*/) { curvePath(arguments, 1, 1); },
+        path:        function path        (/*..points..*/) { mixedPath(arguments, 0, 0); },
+        closedpath:  function closedpath  (/*..points..*/) { mixedPath(arguments, 1, 0); },
+        filledpath:  function filledpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
+        circle:      function circle      (x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0); },
+        filledcircle:function filledcircle(x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0); },
+        arc:         function arc         (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 0, 0); },
+        closedarc:   function closedarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 0); },
+        filledarc:   function filledarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1); },
+        rect:        function rect        (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
+        filledrect:  function filledrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
+        clear:       function clear       (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
     };
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
     function yof(y, h) { return originY + dy * (dy > 0 ? y : y + (h||0)); }
+    function aof(a) { var va = (dy > 0 ? a : -a); return (dx > 0 ? va : Math.PI - va); }
 
     function linePath(args, close, fill) {
         var d = (fill ? 0 : 0.5);
@@ -77,6 +83,14 @@ function Renderer(config, width, height) {
             if (i < args.length - 1) { ctx.quadraticCurveTo(xof(args[i]+d), yof(args[i+1]+d), xof(args[0]+d), yof(args[1]+d)); }
             else { ctx.closePath(); }
         }
+        ctx[fill ? 'fill' : 'stroke']();
+    }
+
+    function _arc(x, y, r, s, e, close, fill) {
+        var d = (fill ? 0 : 0.5);
+        ctx.beginPath();
+        ctx.arc(xof(x+d), yof(y+d), r, aof(s), aof(e), (dx * dy < 0));
+        if (close) { ctx.closePath(); }
         ctx[fill ? 'fill' : 'stroke']();
     }
 
