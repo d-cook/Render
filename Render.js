@@ -47,7 +47,7 @@ function Renderer(config, width, height) {
         closedpath:  function closedpath  (/*..points..*/) { mixedPath(arguments, 1, 0); },
         filledpath:  function filledpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
         circle:      function circle      (x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0, 0); },
-        filledcircle:function filledcircle(x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0, 0); },
+        filledcircle:function filledcircle(x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 1, 0); },
         arc:         function arc         (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 0, 0, 0); },
         closedarc:   function closedarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 0, 0); },
         filledarc:   function filledarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1, 0); },
