@@ -33,6 +33,9 @@ function Renderer(config, width, height) {
     var originY  = 0;
     var content  = [];
 
+    var lastClicked = null;
+    var events = {};
+
     buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
@@ -167,37 +170,47 @@ function Renderer(config, width, height) {
         });
     }
 
-    function on(el, name, f) {
-        el.addEventListener(name, function(e) {
+    function on(name, f) {
+        window.addEventListener(name, function(e) {
             e = e || window.event;
             if (f(e) === false) {
                 e.cancelBubble = true;
                 e.preventDefault && e.preventDefault();
                 return false;
             }
-        }, true);
+        }, false);
     }
 
-    var lastClicked = null;
-    on(window, 'mousedown', function(e) { lastClicked = e.target; });
-
-    function onKey(name, f) {
-        on(window, 'key' + name, function(e) {
-            if (lastClicked === canvas) { f(e.keyCode); return false; }
+    function addKeyEvent(name) {
+        name = 'key' + name;
+        on(name, function(e) {
+            if (events[name] && lastClicked === canvas) {
+                events[name](e.keyCode);
+                return false;
+            }
         });
     }
 
-    function onMouse(name, f) {
-        on(canvas, 'mouse' + name, function(e) {
-            var r = canvas.getBoundingClientRect();
-            var w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
-            var h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
-            var x = xof(e.clientX - r.left - w);
-            var y = yof(e.clientY - r.top  - h);
-            if (x >= 0 && y >= 0 && x < canvas.width && y < canvas.height) { f(x, y); }
-            return false;
+    function addMouseEvent(name) {
+        name = 'mouse' + name;
+        on(name, function(e) {
+            if (name === 'mousedown') { lastClicked = e.target; }
+            if (events[name]) {
+                var r = canvas.getBoundingClientRect();
+                var w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
+                var h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
+                var x = xof(e.clientX - r.left - w);
+                var y = yof(e.clientY - r.top  - h);
+                if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
+                    events[name](x, y);
+                    return false;
+                }
+            }
         });
     }
+
+    addKeyEvent('up'); addKeyEvent('down');
+    addMouseEvent('up'); addMouseEvent('down'); addMouseEvent('move');
 
     renderFrame();
 
@@ -217,10 +230,10 @@ function Renderer(config, width, height) {
             buffer.height = canvas.height = h;
             renderFrame();
         },
-        onKeyUp:     function onKeyUp    (f) { onKey('up',     f); },
-        onKeyDown:   function onKeyDown  (f) { onKey('down',   f); },
-        onMouseUp:   function onMouseUp  (f) { onMouse('up',   f); },
-        onMouseMove: function onMouseMove(f) { onMouse('move', f); },
-        onMouseDown: function onMouseDown(f) { onMouse('down', f); }
+        onKeyUp:     function onKeyUp    (f) { events.keyup     = f; },
+        onKeyDown:   function onKeyDown  (f) { events.keydown   = f; },
+        onMouseUp:   function onMouseUp  (f) { events.mouseup   = f; },
+        onMouseDown: function onMouseDown(f) { events.mousedown = f; },
+        onMouseMove: function onMouseMove(f) { events.mousemove = f; }
     };
 }
