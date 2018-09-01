@@ -167,6 +167,27 @@ function Renderer(config, width, height) {
         });
     }
 
+    function on(el, name, f) {
+        el.addEventListener(name, function(e) {
+            e = e || window.event;
+            f(e);
+            e.cancelBubble = true;
+            e.preventDefault && e.preventDefault();
+            return false;
+        }, false);
+    }
+
+    function onMouse(name, f) {
+        on(canvas, 'mouse' + name, function(e) {
+            var r = canvas.getBoundingClientRect();
+            var w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
+            var h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
+            var x = xof(e.clientX - r.left - w);
+            var y = yof(e.clientY - r.top  - h);
+            if (x >= 0 && y >= 0 && x < canvas.width && y < canvas.height) { f(x, y); }
+        });
+    }
+
     renderFrame();
 
     return {
@@ -185,5 +206,8 @@ function Renderer(config, width, height) {
             buffer.height = canvas.height = h;
             renderFrame();
         },
+        onMouseUp:   function onMouseUp  (f) { onMouse('up',   f); },
+        onMouseMove: function onMouseMove(f) { onMouse('move', f); },
+        onMouseDown: function onMouseDown(f) { onMouse('down', f); }
     };
 }
