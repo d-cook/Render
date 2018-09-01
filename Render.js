@@ -34,6 +34,7 @@ function Renderer(config, width, height) {
     var content  = [];
 
     var lastClicked = null;
+    var isKeyDown = false;
     var events = {};
 
     buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
@@ -184,8 +185,12 @@ function Renderer(config, width, height) {
     function addKeyEvent(name) {
         name = 'key' + name;
         on(name, function(e) {
-            if (events[name] && lastClicked === canvas) {
-                events[name](e.keyCode);
+            var wasKeyDown = isKeyDown;
+            isKeyDown = (name !== 'keyup') && (isKeyDown || name === 'keydown');
+            if (lastClicked === canvas) {
+                if (events[name] && !(wasKeyDown && name === 'keydown')) {
+                    events[name](e.keyCode);
+                }
                 return false;
             }
         });
