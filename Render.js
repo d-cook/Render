@@ -126,8 +126,8 @@ function Renderer(config, width, height) {
 
     function renderFrame() {
         setOrigin();
-        buffer.width--; buffer.width++;
-        canvas.width--; canvas.width++;
+        buffer.width = buffer.width;
+        canvas.width = canvas.width;
         ctx.clearRect(0, 0, buffer.width, buffer.height);
 
         for(var ci = 0; ci < content.length; ci++) {
@@ -167,11 +167,6 @@ function Renderer(config, width, height) {
         });
     }
 
-    function isArray(a) {
-        var s = Object.prototype.toString.call(a);
-        return (s === '[object Array]' || s === '[object Arguments]');
-    }
-
     renderFrame();
 
     return {
@@ -180,8 +175,8 @@ function Renderer(config, width, height) {
         },
         render: function render(c) {
             if (arguments.length > 0) {
-                if (!isArray(c)) { var c2 = []; c2.push.apply(c2, arguments); c = c2; }
-                content = isArray(c[0]) ? c : [c];
+                if (!Array.isArray(c)) { var c2 = []; c2.push.apply(c2, arguments); c = c2; }
+                content = Array.isArray(c[0]) ? c : [c];
             }
             renderFrame();
         },
