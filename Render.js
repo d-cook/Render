@@ -177,6 +177,15 @@ function Renderer(config, width, height) {
         }, false);
     }
 
+    var lastClicked = null;
+    on(window, 'mousedown', function(e) { lastClicked = e.target; });
+
+    function onKey(name, f) {
+        on(window, 'key' + name, function(e) {
+            if (lastClicked === canvas) { f(e.keyCode); }
+        });
+    }
+
     function onMouse(name, f) {
         on(canvas, 'mouse' + name, function(e) {
             var r = canvas.getBoundingClientRect();
@@ -206,6 +215,8 @@ function Renderer(config, width, height) {
             buffer.height = canvas.height = h;
             renderFrame();
         },
+        onKeyUp:     function onKeyUp    (f) { onKey('up',     f); },
+        onKeyDown:   function onKeyDown  (f) { onKey('down',   f); },
         onMouseUp:   function onMouseUp  (f) { onMouse('up',   f); },
         onMouseMove: function onMouseMove(f) { onMouse('move', f); },
         onMouseDown: function onMouseDown(f) { onMouse('down', f); }
