@@ -170,11 +170,12 @@ function Renderer(config, width, height) {
     function on(el, name, f) {
         el.addEventListener(name, function(e) {
             e = e || window.event;
-            f(e);
-            e.cancelBubble = true;
-            e.preventDefault && e.preventDefault();
-            return false;
-        }, false);
+            if (f(e) === false) {
+                e.cancelBubble = true;
+                e.preventDefault && e.preventDefault();
+                return false;
+            }
+        }, true);
     }
 
     var lastClicked = null;
@@ -182,7 +183,7 @@ function Renderer(config, width, height) {
 
     function onKey(name, f) {
         on(window, 'key' + name, function(e) {
-            if (lastClicked === canvas) { f(e.keyCode); }
+            if (lastClicked === canvas) { f(e.keyCode); return false; }
         });
     }
 
@@ -194,6 +195,7 @@ function Renderer(config, width, height) {
             var x = xof(e.clientX - r.left - w);
             var y = yof(e.clientY - r.top  - h);
             if (x >= 0 && y >= 0 && x < canvas.width && y < canvas.height) { f(x, y); }
+            return false;
         });
     }
 
