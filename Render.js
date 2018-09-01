@@ -172,27 +172,16 @@ function Renderer(config, width, height) {
     }
 
     function on(name, f) {
-        window.addEventListener(name, function(e) {
-            e = e || window.event;
-            if (f(e) === false) {
-                e.cancelBubble = true;
-                e.preventDefault && e.preventDefault();
-                return false;
-            }
-        }, false);
+        window.addEventListener(name, function(e) { f(e || window.event); }, false);
     }
 
     function addKeyEvent(name) {
         name = 'key' + name;
         on(name, function(e) {
-            var wasKeyDown = isKeyDown;
-            isKeyDown = (name !== 'keyup') && (isKeyDown || name === 'keydown');
-            if (lastClicked === canvas) {
-                if (events[name] && !(wasKeyDown && name === 'keydown')) {
-                    events[name](e.keyCode);
-                }
-                return false;
+            if (events[name] && lastClicked === canvas && !(isKeyDown && name === 'keydown')) {
+                events[name](e.keyCode);
             }
+            isKeyDown = (name !== 'keyup') && (isKeyDown || name === 'keydown');
         });
     }
 
@@ -208,13 +197,12 @@ function Renderer(config, width, height) {
                 var y = yof(e.clientY - r.top  - h);
                 if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
                     events[name](x, y);
-                    return false;
                 }
             }
         });
     }
 
-    addKeyEvent('up'); addKeyEvent('down');
+    addKeyEvent  ('up'); addKeyEvent  ('down');
     addMouseEvent('up'); addMouseEvent('down'); addMouseEvent('move');
 
     renderFrame();
