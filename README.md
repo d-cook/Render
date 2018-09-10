@@ -5,7 +5,7 @@ The idea is to be able to create a UI from a single descriptive dataset, rather 
 
 ## Usage:
 
-**Constructor: renderer(config, width, height)**
+**Constructor: renderer(config, width, height, textConfig)**
 Creates a new HTML5 canvas, with convenience methods for rendering graphics primitives. All parameters are optional, and "config" can be given either first or last.
 * **width**: The width of the canvas to create (in pixels). The default is 500.
 * **height**: The height of the canvas to create (in pixels). The default is whatever the width is.
@@ -16,6 +16,11 @@ Creates a new HTML5 canvas, with convenience methods for rendering graphics prim
 * * bottom: Y-Origin (y=0) will be at the bottom, with positive-y going upward.
 * * middle: The Origin (X or Y or both) will be in the center, with positive values going rightward / upward. This option is assumed by default when an alternate value is not provided for the X or Y Origin.
 * * (any valid color): The default color that will be used in rendering anything. If not provided, the default color will be "black".
+* **textConfig**: Can provide any of the following properties (defaults in bold):
+* * font: CSS-like font. Example: "10px sans-serif"
+* * align: Horizontal text alignment: "**start**", "end", "left", "right", "center"
+* * baseline: Vertical text alignment: "top", "hanging", "middle", "**alphabetic**", "ideographic", "bottom"
+* * direction: "ltr", "rtl", "**inherit**" (inherit from CSS parent)
 
 **getCanvas()**
 Returns the HTML5 canvas created by the constructor (e.g. so it can be appended to the DOM).
@@ -37,6 +42,10 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["curve", x1, y1, c1x, c1y, c2x, c2y, x2, y2]` *(single bezier curve)*
 * `["curve", x1, y1, cx, cy, x2, y2, ...]` *(each additional (cx, cy, x, y) forms a quad curve)*
 * `["path", x1, y1, [...], ...]` *(sequence of lines (x, y), arcs (x, y, a), quads (cx, cy, x, y), or beziers (c1x, c1y, c2x, c2y, x, y))*
+* `["text", "Hello!", x, y]` *(Draw text at (x, y))*
+* `["text", "Hello!", x, y, w]` *(Draw text at (x, y), and limit width to w)*
+* `["text", "Hello!", x, y, {...}]` *(Draw text at (x, y), with css-like properties (see "textConfig" in constructor))*
+* `["text", "Hello!", x, y, w, {...}]` *(Draw text at (x, y), width w, & properties (see "textConfig" in constructor))*
 
 **Optional Keywords:**
 * filled (`"filled rect"`): The entity will be filled-in (rather than just be outlined).

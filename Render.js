@@ -1,6 +1,14 @@
-function Renderer(config, width, height) {
-    if ((typeof config) !== 'string') { var x = config; config = width;  width  = x; }
-    if ((typeof config) !== 'string') { var x = config; config = height; height = x; }
+function Renderer(config, width, height, textConfig) {
+    var _ctorArgs = [].slice.call(arguments, 0);
+    config = null; width = null; height = null; textConfig = null;
+
+    for(var i = 0; i < _ctorArgs.length; i++) {
+        var a = _ctorArgs[i]; var ta = (typeof a);
+        if (ta === 'string' && config === null) { config = a; }
+        else if (ta === 'number' && width === null) { width = a; }
+        else if (ta === 'number' && height === null) { height = a; }
+        else if (ta === 'object' && textConfig === null) { textConfig = a; }
+    }
 
     var baseX, baseY, defColor;
 
@@ -40,6 +48,13 @@ function Renderer(config, width, height) {
     buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
+    textConfig = Object.assign({}, {
+        font: '10px sans-serif',
+        align: 'start',
+        baseline: 'alphabetic',
+        direction: 'inherit'
+    }, (textConfig || {}));
+
     var ops = {
         line:        function line        (/*..points..*/) { linePath(arguments, 0, 0); },
         poly:        function poly        (/*..points..*/) { linePath(arguments, 1, 0); },
@@ -57,7 +72,11 @@ function Renderer(config, width, height) {
         filledarc:   function filledarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1, 0); },
         rect:        function rect        (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
         filledrect:  function filledrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
-        clear:       function clear       (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); }
+        clear:       function clear       (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); },
+        text:        function text        (t, x, y, w, c) {
+            c = arguments[arguments.length - 1];
+            _text(t, x, y, w, (typeof c === 'object' && c), true);
+        }
     };
 
     function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
@@ -88,6 +107,17 @@ function Renderer(config, width, height) {
             else { ctx.closePath(); }
         }
         ctx[fill ? 'fill' : 'stroke']();
+    }
+
+    function _text(t, x, y, w, c, fill) {
+        var d = (fill ? 0 : 0.5);
+        c = Object.assign({}, textConfig, (c || {}));
+        ctx.font = c.font;
+        ctx.textAlign = c.align;
+        ctx.textBaseline = c.baseline;
+        ctx.direction = c.direction;
+        if (typeof w === 'number') { ctx[fill ? 'fillText' : 'strokeText'](t, x, y, w); }
+        else /*******************/ { ctx[fill ? 'fillText' : 'strokeText'](t, x, y); }
     }
 
     function _arc(x, y, r, s, e, close, fill, path) {
