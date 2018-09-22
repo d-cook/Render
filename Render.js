@@ -49,7 +49,8 @@ function Renderer(config, width, height, textConfig) {
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
     textConfig = Object.assign({}, {
-        font: '10px sans-serif',
+        font: 'sans-serif',
+        size: '10px',
         align: 'start',
         baseline: 'alphabetic',
         direction: 'inherit'
@@ -112,7 +113,8 @@ function Renderer(config, width, height, textConfig) {
     function _text(t, x, y, w, c, fill) {
         var d = (fill ? 0 : 0.5);
         c = Object.assign({}, textConfig, (c || {}));
-        ctx.font = c.font;
+        var s = c.size; s = /^\d+$/.test(s) ? s+'px' : String(s);
+        ctx.font = s + ' ' + c.font;
         ctx.textAlign = c.align;
         ctx.textBaseline = c.baseline;
         ctx.direction = c.direction;
