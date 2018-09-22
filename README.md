@@ -17,7 +17,8 @@ Creates a new HTML5 canvas, with convenience methods for rendering graphics prim
 * * middle: The Origin (X or Y or both) will be in the center, with positive values going rightward / upward. This option is assumed by default when an alternate value is not provided for the X or Y Origin.
 * * (any valid color): The default color that will be used in rendering anything. If not provided, the default color will be "black".
 * **textConfig**: Can provide any of the following properties (defaults in bold):
-* * font: CSS-like font. Example: "10px sans-serif"
+* * font: CSS font-family. Example: "sans-serif"
+* * size: CSS font-size. Examples: 16, "16px", "12pt"
 * * align: Horizontal text alignment: "**start**", "end", "left", "right", "center"
 * * baseline: Vertical text alignment: "top", "hanging", "middle", "**alphabetic**", "ideographic", "bottom"
 * * direction: "ltr", "rtl", "**inherit**" (inherit from CSS parent)
@@ -25,7 +26,7 @@ Creates a new HTML5 canvas, with convenience methods for rendering graphics prim
 **getCanvas()**
 Returns the HTML5 canvas created by the constructor (e.g. so it can be appended to the DOM).
 
-**resize(w:number, h:number)**
+**resize(w, h)**
 Resizes the canvas (in pixels). This also rerenders content (as passed to render(..)) after the resize. Use this method instead of resizing the canvas (as returned from getCanvas()) directly, otherwise the rendered content will *not* be automatically rerendered.
 
 **render(content:[["keywords", arguments...], ...])**
