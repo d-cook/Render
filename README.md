@@ -29,6 +29,9 @@ Returns the HTML5 canvas created by the constructor (e.g. so it can be appended 
 **resize(w, h)**
 Resizes the canvas (in pixels). This also rerenders content (as passed to render(..)) after the resize. Use this method instead of resizing the canvas (as returned from getCanvas()) directly, otherwise the rendered content will *not* be automatically rerendered.
 
+**textWidth(text, config)**
+Returns the width of the text (and optional config) if it were to be rendered with the "text" command (see below).
+
 **render(content:[["keywords", arguments...], ...])**
 Renders new graphics content. Any previously rendered content is removed (erased). In other words, each call to render(..) should contain *all* graphics content that the canvas should display. The "keywords" contain the name of the graphical entity to render, and other optional keywords, in any order and separated by spaces. The "arguments" to provide depends on which entity it to be rendered.
 

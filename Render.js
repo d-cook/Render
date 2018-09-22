@@ -259,6 +259,10 @@ function Renderer(config, width, height, textConfig) {
             buffer.height = canvas.height = h;
             renderFrame();
         },
+        textWidth: function textWidth(text, config) {
+            setFont(config);
+            return ctx.measureText(text).width || 0;
+        },
         onKeyUp:     function onKeyUp    (f) { events.keyup     = f; },
         onKeyDown:   function onKeyDown  (f) { events.keydown   = f; },
         onMouseUp:   function onMouseUp  (f) { events.mouseup   = f; },
