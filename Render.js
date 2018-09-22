@@ -84,6 +84,15 @@ function Renderer(config, width, height, textConfig) {
     function yof(y, h) { return originY + dy * (dy > 0 ? y : y + (h||0)); }
     function aof(a) { var va = (dy > 0 ? a : -a); return (dx > 0 ? va : Math.PI - va); }
 
+    function setFont(config) {
+        config = Object.assign({}, textConfig, (config || {}));
+        var s = config.size; s = /^\d+$/.test(s) ? s+'px' : String(s);
+        ctx.font = s + ' ' + config.font;
+        ctx.textAlign = config.align;
+        ctx.textBaseline = config.baseline;
+        ctx.direction = config.direction;
+    }
+
     function linePath(args, close, fill) {
         var d = (fill ? 0 : 0.5);
         ctx.moveTo(xof(args[0]+d), yof(args[1]+d));
@@ -112,12 +121,7 @@ function Renderer(config, width, height, textConfig) {
 
     function _text(t, x, y, w, c, fill) {
         var d = (fill ? 0 : 0.5);
-        c = Object.assign({}, textConfig, (c || {}));
-        var s = c.size; s = /^\d+$/.test(s) ? s+'px' : String(s);
-        ctx.font = s + ' ' + c.font;
-        ctx.textAlign = c.align;
-        ctx.textBaseline = c.baseline;
-        ctx.direction = c.direction;
+        setFont(c);
         if (typeof w === 'number') { ctx[fill ? 'fillText' : 'strokeText'](t, x, y, w); }
         else /*******************/ { ctx[fill ? 'fillText' : 'strokeText'](t, x, y); }
     }
