@@ -39,7 +39,6 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["circle", x, y, r]` *(circle centered at (x, y) with radius r)*
 * `["arc", x, y, r, s, e]` *(arc of circle ... from **s**tart angle to **e**nd angle (in radians))*
 * `["line", x1, y1, x2, y2, ...]` *(each additional (x, y) forms a line segment from previous point)*
-* `["poly", x1, y1, x2, y2, ...]` *(like "line", but forms a closed polygon)*
 * `["rect", x, y, width, height]` *(rectangle)*
 * `["clear", x, y, width, height]` *(clear the pixels in the given rectangle)*
 * `["curve", x1, y1, cx, cy, x2, y2]` *(single quadratic curve)*

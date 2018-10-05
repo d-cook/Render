@@ -58,8 +58,8 @@ function Renderer(config, width, height, textConfig) {
 
     var ops = {
         line:        function line        (/*..points..*/) { linePath(arguments, 0, 0); },
-        poly:        function poly        (/*..points..*/) { linePath(arguments, 1, 0); },
-        filledpoly:  function filledpoly  (/*..points..*/) { linePath(arguments, 1, 1); },
+        closedline:  function closedline  (/*..points..*/) { linePath(arguments, 1, 0); },
+        filledline:  function filledline  (/*..points..*/) { linePath(arguments, 1, 1); },
         curve:       function curve       (/*..points..*/) { curvePath(arguments, 0, 0); },
         closedcurve: function closedcurve (/*..points..*/) { curvePath(arguments, 1, 0); },
         filledcurve: function filledcurve (/*..points..*/) { curvePath(arguments, 1, 1); },
