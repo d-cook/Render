@@ -206,11 +206,11 @@ function Renderer(config, width, height, textConfig) {
     // ---- Event Handlers ----
 
     var events = {};
+    var keysDown = {};
     var prevMouse = null;
     var lastClicked = null;
     var clickTimer = null;
     var clickTimeout = 0;
-    var isKeyDown = false;
     var pressed = false;
     var dragged = false;
     var clicks = 0;
@@ -232,14 +232,14 @@ function Renderer(config, width, height, textConfig) {
         if (events.keyup && lastClicked === canvas) {
             events.keyup(e.keyCode);
         }
-        isKeyDown = false;
+        keysDown[e.keyCode] = false;
     });
 
     on('keydown', function keydown(e) {
-        if (events.keydown && lastClicked === canvas && !isKeyDown) {
+        if (events.keydown && lastClicked === canvas && !keysDown[e.keyCode]) {
             events.keydown(e.keyCode);
         }
-        isKeyDown = true;
+        keysDown[e.keyCode] = true;
     });
 
     on('mousedown', function mousedown(e) {
