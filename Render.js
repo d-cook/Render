@@ -41,10 +41,6 @@ function Renderer(config, width, height, textConfig) {
     var originY  = 0;
     var content  = [];
 
-    var lastClicked = null;
-    var isKeyDown = false;
-    var events = {};
-
     buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
 
@@ -207,39 +203,86 @@ function Renderer(config, width, height, textConfig) {
         });
     }
 
+    // ---- Event Handlers ----
+
+    var events = {};
+    var prevMouse = null;
+    var lastClicked = null;
+    var clickTimer = null;
+    var clickTimeout = 0;
+    var isKeyDown = false;
+    var pressed = false;
+    var dragged = false;
+    var clicks = 0;
+
     function on(name, f) {
-        window.addEventListener(name, function(e) { f(e || window.event); }, false);
+        window.addEventListener(name, e => f(e || window.event), false);
     }
 
-    function addKeyEvent(name) {
-        name = 'key' + name;
-        on(name, function(e) {
-            if (events[name] && lastClicked === canvas && !(isKeyDown && name === 'keydown')) {
-                events[name](e.keyCode);
+    function getMouseCoords(e) {
+        var r = canvas.getBoundingClientRect();
+        var w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
+        var h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
+        var x = xof(e.clientX - r.left - w);
+        var y = yof(e.clientY - r.top  - h);
+        return (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) ? { x: x, y: y} : null;
+    }
+
+    on('keyup',   function keyup  (e) {
+        if (events.keyup && lastClicked === canvas) {
+            events.keyup(e.keyCode);
+        }
+        isKeyDown = false;
+    });
+
+    on('keydown', function keydown(e) {
+        if (events.keydown && lastClicked === canvas && !isKeyDown) {
+            events.keydown(e.keyCode);
+        }
+        isKeyDown = true;
+    });
+
+    on('mousedown', function mousedown(e) {
+        var m = getMouseCoords(e);
+        if (m && events.mousedown) {
+            events.mousedown(m.x, m.y);
+        }
+        lastClicked = e.target;
+        pressed = true;
+    });
+
+    on('mouseup', function mouseup(e) {
+        var m = getMouseCoords(e);
+        if (m && events.mouseup) {
+            events.mouseup(m.x, m.y);
+        }
+        if (!dragged) {
+            clicks++;
+            if (clickTimeout > 0) {
+                if (clickTimer) { clearTimeout(clickTimer); }
+                clickTimer = setTimeout(() => clicks = 0, clickTimeout);
             }
-            isKeyDown = (name !== 'keyup') && (isKeyDown || name === 'keydown');
-        });
-    }
-
-    function addMouseEvent(name) {
-        name = 'mouse' + name;
-        on(name, function(e) {
-            if (name === 'mousedown') { lastClicked = e.target; }
-            if (events[name]) {
-                var r = canvas.getBoundingClientRect();
-                var w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
-                var h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
-                var x = xof(e.clientX - r.left - w);
-                var y = yof(e.clientY - r.top  - h);
-                if (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) {
-                    events[name](x, y);
-                }
+            if (m && events.mouseclick) {
+                events.mouseclick(m.x, m.y, clicks);
             }
-        });
-    }
+        }
+        dragged = false;
+        pressed = false;
+    });
 
-    addKeyEvent  ('up'); addKeyEvent  ('down');
-    addMouseEvent('up'); addMouseEvent('down'); addMouseEvent('move');
+    on('mousemove', function mousemove(e) {
+        var m = getMouseCoords(e);
+        if (m && events.mousedrag) {
+            var p = prevMouse || m;
+            events.mousemove(m.x, m.y, p.x, p.y);
+            if (pressed) {
+                events.mousedrag(m.x, m.y, p.x, p.y);
+            }
+            prevMouse = m;
+            clicks = 0;
+        }
+        if (pressed) { dragged = true; }
+    });
 
     renderFrame();
 
@@ -263,10 +306,15 @@ function Renderer(config, width, height, textConfig) {
             setFont(config);
             return ctx.measureText(text).width || 0;
         },
-        onKeyUp:     function onKeyUp    (f) { events.keyup     = f; },
-        onKeyDown:   function onKeyDown  (f) { events.keydown   = f; },
-        onMouseUp:   function onMouseUp  (f) { events.mouseup   = f; },
-        onMouseDown: function onMouseDown(f) { events.mousedown = f; },
-        onMouseMove: function onMouseMove(f) { events.mousemove = f; }
+        onKeyUp:      function onKeyUp     (f) { events.keyup     = f; },
+        onKeyDown:    function onKeyDown   (f) { events.keydown   = f; },
+        onMouseUp:    function onMouseUp   (f) { events.mouseup   = f; },
+        onMouseDown:  function onMouseDown (f) { events.mousedown = f; },
+        onMouseMove:  function onMouseMove (f) { events.mousemove = f; },
+        onMouseDrag:  function onMouseDrag (f) { events.mousedrag = f; },
+        onMouseClick: function onMouseClick(f, timeout) {
+            if (arguments.length > 1) { clickTimeout = timeout; }
+            events.mouseclick = f;
+        }
     };
 }

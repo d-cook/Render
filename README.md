@@ -5,7 +5,7 @@ The idea is to be able to create a UI from a single descriptive dataset, rather 
 
 ## Usage:
 
-**Constructor: renderer(config, width, height, textConfig)**
+**`Renderer(config, width, height, textConfig)`** (constructor)
 Creates a new HTML5 canvas, with convenience methods for rendering graphics primitives. All parameters are optional, and "config" can be given either first or last.
 * **width**: The width of the canvas to create (in pixels). The default is 500.
 * **height**: The height of the canvas to create (in pixels). The default is whatever the width is.
@@ -23,16 +23,16 @@ Creates a new HTML5 canvas, with convenience methods for rendering graphics prim
 * * baseline: Vertical text alignment: "top", "hanging", "middle", "**alphabetic**", "ideographic", "bottom"
 * * direction: "ltr", "rtl", "**inherit**" (inherit from CSS parent)
 
-**getCanvas()**
+**`getCanvas()`**
 Returns the HTML5 canvas created by the constructor (e.g. so it can be appended to the DOM).
 
-**resize(w, h)**
+**`resize(w, h)`**
 Resizes the canvas (in pixels). This also rerenders content (as passed to render(..)) after the resize. Use this method instead of resizing the canvas (as returned from getCanvas()) directly, otherwise the rendered content will *not* be automatically rerendered.
 
-**textWidth(text, config)**
+**`textWidth(text, config)`**
 Returns the width of the text (and optional config) if it were to be rendered with the "text" command (see below).
 
-**render(content:[["keywords", arguments...], ...])**
+**`render(content:[["keywords", arguments...], ...])`**
 Renders new graphics content. Any previously rendered content is removed (erased). In other words, each call to render(..) should contain *all* graphics content that the canvas should display. The "keywords" contain the name of the graphical entity to render, and other optional keywords, in any order and separated by spaces. The "arguments" to provide depends on which entity it to be rendered.
 
 **Example entities:**
@@ -54,3 +54,12 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * filled (`"filled rect"`): The entity will be filled-in (rather than just be outlined).
 * closed (`"closed curve"`): The start & end points are joined to form a "closed" shape.
 * *(any valid color)* (`"blue line"`, `"#0088FF rect"`): The color to render the entity in.
+
+**Keyboard & Mouse events:**
+* * `onKeyUp     (function (code) { ... })` (passes the key-code when a keyboard key is released)
+* * `onKeyDown   (function (code) { ... })` (passes the key-code when a keyboard key is pressed)
+* * `onMouseUp   (function (x, y) { ... })` (passes the (x,y) cursor position when mouse-button is released)
+* * `onMouseDown (function (x, y) { ... })` (passes the (x,y) cursor position when mouse-button is pressed)
+* * `onMouseMove (function (x, y, pX, pY) { ... })` (passes current and previous cursor position when mouse is moved)
+* * `onMouseDrag (function (x, y, pX, pY) { ... })` (passes current and previous cursor position when mouse is dragged)
+* * `onMouseClick(function (x, y, clicks) { ... }, timeout)` (position and number of clicks when mouse is clicked. If given a timeout, then the number of clicks resets after the timeout. For example, specify how quickly clicks must happen to be counted as a double-click, and detect a double-click when clicks is > 1)
