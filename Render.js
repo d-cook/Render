@@ -203,6 +203,23 @@ function Renderer(config, width, height, textConfig) {
         });
     }
 
+    function resizeCanvas(w, h) {
+        buffer.width = canvas.width  = w;
+        buffer.height = canvas.height = h;
+        renderFrame();
+    }
+
+    function fitCanvasToWindow() {
+        function fillWindow() {
+            resizeCanvas(window.innerWidth, window.innerHeight);
+        }
+        window.addEventListener('resize', fillWindow);
+        document.body.style.margin = '0';
+        document.body.style.overflow = 'hidden';
+        document.body.appendChild(canvas);
+        fillWindow();
+    }
+
     // ---- Event Handlers ----
 
     var events = {};
@@ -297,11 +314,8 @@ function Renderer(config, width, height, textConfig) {
             }
             renderFrame();
         },
-        resize: function resize(w, h) {
-            buffer.width = canvas.width  = w;
-            buffer.height = canvas.height = h;
-            renderFrame();
-        },
+        resize: resizeCanvas,
+        fitToWindow: fitCanvasToWindow,
         textWidth: function textWidth(text, config) {
             setFont(config);
             return ctx.measureText(text).width || 0;
