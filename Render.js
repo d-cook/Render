@@ -209,15 +209,20 @@ function Renderer(config, width, height, textConfig) {
         renderFrame();
     }
 
-    function fitCanvasToWindow() {
-        function fillWindow() {
-            resizeCanvas(window.innerWidth, window.innerHeight);
+    function fillWindow() {
+        resizeCanvas(window.innerWidth, window.innerHeight);
+    }
+
+    function fitToWindow(onResize) {
+        function resizeRenderer() {
+            if (onResize) { onResize(window.innerWidth, window.innerHeight); }
+            fillWindow();
         }
-        window.addEventListener('resize', fillWindow);
+        window.addEventListener('resize', resizeRenderer);
         document.body.style.margin = '0';
         document.body.style.overflow = 'hidden';
         document.body.appendChild(canvas);
-        fillWindow();
+        resizeRenderer();
     }
 
     // ---- Event Handlers ----
@@ -315,7 +320,8 @@ function Renderer(config, width, height, textConfig) {
             renderFrame();
         },
         resize: resizeCanvas,
-        fitToWindow: fitCanvasToWindow,
+        fillWindow: fillWindow,
+        fitToWindow: fitToWindow,
         textWidth: function textWidth(text, config) {
             setFont(config);
             return ctx.measureText(text).width || 0;
