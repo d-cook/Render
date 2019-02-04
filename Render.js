@@ -280,13 +280,13 @@ function Renderer(config, width, height, textConfig) {
         }
         if (!dragged) {
             clicks++;
-            if (clickTimeout > 0) {
-                if (clickTimer) { clearTimeout(clickTimer); }
-                clickTimer = setTimeout(() => clicks = 0, clickTimeout);
-            }
-            if (m && events.mouseclick) {
-                events.mouseclick(m.x, m.y, clicks);
-            }
+            if (clickTimer) { clearTimeout(clickTimer); }
+            clickTimer = setTimeout(() => {
+                if (m && events.mouseclick) {
+                    events.mouseclick(m.x, m.y, clicks);
+                }
+                clicks = 0;
+            }, clickTimeout||0);
         }
         dragged = false;
         pressed = false;
