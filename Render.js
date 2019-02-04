@@ -338,3 +338,16 @@ function Renderer(config, width, height, textConfig) {
         }
     };
 }
+
+/*
+// ---- EVENTS DEMO ----
+var ui = Renderer('top left');
+ui.fitToWindow();
+ui.onMouseMove((x, y, px, py) => ui.render([['red circle', px, py, 12],['blue circle', x, y, 10]]));
+ui.onMouseDrag((x, y, px, py) => ui.render([['filled red circle', px, py, 12],['filled blue circle', x, y, 10]]));
+ui.onMouseDown((x, y) => ui.render([['filled blue rect', x-10, y-10, 20, 20]]));
+ui.onMouseUp  ((x, y) => ui.render([['blue rect', x-10, y-10, 20, 20]]));
+ui.onMouseClick((x, y, clicks) => ui.render([['red rect', x-12-clicks*clicks, y-12-clicks*clicks, 24+2*clicks*clicks, 24+2*clicks*clicks]]), 250);
+ui.onKeyDown(k => console.log("DOWN: " + k ));
+ui.onKeyUp  (k => console.log("UP  : " + k ));
+*/
