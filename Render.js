@@ -40,6 +40,7 @@ function Renderer(config, width, height, textConfig) {
     var originX  = 0;
     var originY  = 0;
     var content  = [];
+    var clips    = [];
 
     buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
     buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
@@ -73,6 +74,23 @@ function Renderer(config, width, height, textConfig) {
         text:        function text        (t, x, y, w, c) {
             c = arguments[arguments.length - 1];
             _text(t, x, y, w, (typeof c === 'object' && c), true);
+        },
+        clip:        function clip        (x, y, w, h /*..content..*/) {
+            var x2 = x + w;
+            var y2 = y + h;
+            if (clips.length > 0) {
+                var c = clips[clips.length - 1];
+                if (x >= c.x2 || c.x >= x2 || y >= c.y2 || c.y >= y2) { return; }
+                x = Math.max(x, c.x); x2 = Math.min(x2, c.x2); w = x2 - x;
+                y = Math.max(y, c.y); y2 = Math.min(y2, c.y2); h = y2 - y;
+            }
+            ctx.save();
+            ctx.rect(xof(x), yof(y), w, h);
+            ctx.clip();
+            clips.push({ x:x, y:y, x2:x2, y2:y2 });
+            renderContent([].slice.call(arguments, 4));
+            clips.pop();
+            ctx.restore();
         }
     };
 

@@ -49,6 +49,7 @@ Renders new graphics content. Any previously rendered content is removed (erased
 * `["text", "Hello!", x, y, w]` *(Draw text at (x, y), and limit width to w)*
 * `["text", "Hello!", x, y, {...}]` *(Draw text at (x, y), with css-like properties (see "textConfig" in constructor))*
 * `["text", "Hello!", x, y, w, {...}]` *(Draw text at (x, y), width w, & properties (see "textConfig" in constructor))*
+* `["clip", x, y, w, h, ...content]` *(Draw content (nested) within a clipped/bounded rectangle)*
 
 **Optional Keywords:**
 * filled (`"filled rect"`): The entity will be filled-in (rather than just be outlined).
