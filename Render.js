@@ -175,16 +175,16 @@ function Renderer(config, width, height, textConfig) {
             for(var i = 0; i < ids.length; i++) {
                 var id = ids[i];
                 var o  = ops[id];
-                var so = ops['filled'+id];
+                var fo = ops['filled'+id];
                 var co = ops['closed'+id];
                 var fd = (id === 'filled');
                 var cd = (id === 'closed');
                 op     = (op     || o);
-                fop    = (fop    || so);
+                fop    = (fop    || fo);
                 cop    = (cop    || co);
                 filled = (filled || fd);
                 closed = (closed || cd);
-                color  = (color  || (!o && !so && !co && !fd && !cd && id));
+                color  = (color  || (!o && !fo && !co && !fd && !cd && id));
             }
 
             op = (filled && fop) || (closed && cop) || op;
