@@ -160,14 +160,9 @@ function Renderer(config, width, height, textConfig) {
         originY = (baseY === 'top' ) ? 0 : (baseY === 'bottom') ? canvas.height : Math.floor(canvas.height / 2);
     }
 
-    function renderFrame() {
-        setOrigin();
-        buffer.width = buffer.width;
-        canvas.width = canvas.width;
-        ctx.clearRect(0, 0, buffer.width, buffer.height);
-
-        for(var ci = 0; ci < content.length; ci++) {
-            var data = content[ci] || ['noop'];
+    function renderContent(content) {
+        content.map(c => {
+            var data = c || ['noop'];
             var ids = ('' + (data[0] || '')).toLowerCase().split(' ');
             var filled = false, closed = false, color = null;
             var op = null, fop = null, cop = null;
@@ -195,8 +190,15 @@ function Renderer(config, width, height, textConfig) {
                 ctx.beginPath();
                 op.apply(null, args);
             }
-        }
+        });
+    }
 
+    function renderFrame() {
+        setOrigin();
+        buffer.width = buffer.width;
+        canvas.width = canvas.width;
+        ctx.clearRect(0, 0, buffer.width, buffer.height);
+        renderContent(content);
         requestAnimationFrame(function renderBuffer() {
             outerCtx.clearRect(0, 0, canvas.width, canvas.height);
             outerCtx.drawImage(buffer, 0, 0);
