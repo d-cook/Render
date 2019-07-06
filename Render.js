@@ -1,174 +1,175 @@
 function Renderer(config, width, height, textConfig) {
-    var _ctorArgs = [].slice.call(arguments, 0);
-    config = null; width = null; height = null; textConfig = null;
-
-    for(var i = 0; i < _ctorArgs.length; i++) {
-        var a = _ctorArgs[i]; var ta = (typeof a);
-        if (ta === 'string' && config === null) { config = a; }
-        else if (ta === 'number' && width === null) { width = a; }
-        else if (ta === 'number' && height === null) { height = a; }
-        else if (ta === 'object' && textConfig === null) { textConfig = a; }
+    function type(o) {
+        let t = (typeof o);
+        return (o === null || t === 'undefined') ? 'null'  :
+               (Array.isArray(o)               ) ? 'array' :
+               (t === 'boolean'                ) ? 'bool'  : t;
     }
 
-    var baseX, baseY, defColor;
+    let _ctorArgs = [...arguments];
+    config = null; width = null; height = null; textConfig = null;
+
+    _ctorArgs.map(a => {
+        let ta = type(a);
+        /**/ if (ta === 'string' && config     === null) { config     = a; }
+        else if (ta === 'number' && width      === null) { width      = a; }
+        else if (ta === 'number' && height     === null) { height     = a; }
+        else if (ta === 'object' && textConfig === null) { textConfig = a; }
+    });
+
+    let baseX, baseY, defColor;
 
     (function() {
-        var ids = ('' + (config || '')).toLowerCase().split(' ');
-        var T = null, L = null, R = null, B = null, M = 0, C = null;
-
-        for (var i = 0; i < ids.length; i++) {
-            var id = ids[i];
-            var t = (id === 'top'   ); T = T || (t && !B);
-            var l = (id === 'left'  ); L = L || (l && !R);
-            var r = (id === 'right' ); R = R || (r && !L);
-            var b = (id === 'bottom'); B = B || (b && !T);
-            var m = (id === 'middle' || id === 'center');
+        let ids = ('' + (config || '')).toLowerCase().split(' ');
+        let T = null, L = null, R = null, B = null, M = 0, C = null;
+        ids.map(id => {
+            let t = (id === 'top'   ); T = T || (t && !B);
+            let l = (id === 'left'  ); L = L || (l && !R);
+            let r = (id === 'right' ); R = R || (r && !L);
+            let b = (id === 'bottom'); B = B || (b && !T);
+            let m = (id === 'middle' || id === 'center');
             C = (t || l || r || b || m) ? C : id;
-        }
-
-        baseX = (L) ? 'left' : (R) ? 'right' : 'middle';
-        baseY = (T) ? 'top' : (B) ? 'bottom' : 'middle';
+        });
+        baseX = (L) ? 'left' : (R) ? 'right'  : 'middle';
+        baseY = (T) ? 'top'  : (B) ? 'bottom' : 'middle';
         defColor = C || 'black';
     }());
 
-    var buffer   = document.createElement('canvas');
-    var canvas   = document.createElement('canvas');
-    var ctx      = buffer.getContext('2d');
-    var outerCtx = canvas.getContext('2d');
-    var dx       = (baseX === 'right' ? -1 : +1);
-    var dy       = (baseY === 'top'   ? +1 : -1);
-    var originX  = 0;
-    var originY  = 0;
-    var content  = [];
-    var clips    = [];
+    let buffer   = document.createElement('canvas');
+    let canvas   = document.createElement('canvas');
+    let ctx      = buffer.getContext('2d');
+    let outerCtx = canvas.getContext('2d');
+    let dx       = (baseX === 'right' ? -1 : +1);
+    let dy       = (baseY === 'top'   ? +1 : -1);
+    let originX  = 0;
+    let originY  = 0;
+    let content  = [];
+    let clips    = [];
 
-    buffer.width  = canvas.width  = (typeof width  === 'number') ? width  : 500;
-    buffer.height = canvas.height = (typeof height === 'number') ? height : canvas.width;
+    buffer.width  = canvas.width  = (type(width)  === 'number') ? width  : 500;
+    buffer.height = canvas.height = (type(height) === 'number') ? height : canvas.width;
 
-    textConfig = Object.assign({}, {
-        font: 'sans-serif',
-        size: '10px',
-        align: 'start',
-        baseline: 'alphabetic',
+    textConfig = Object.assign({
+        font     : 'sans-serif',
+        size     : '10px',
+        align    : 'start',
+        baseline : 'alphabetic',
         direction: 'inherit'
     }, (textConfig || {}));
 
-    var ops = {
-        line:        function line        (/*..points..*/) { linePath(arguments, 0, 0); },
-        closedline:  function closedline  (/*..points..*/) { linePath(arguments, 1, 0); },
-        filledline:  function filledline  (/*..points..*/) { linePath(arguments, 1, 1); },
-        curve:       function curve       (/*..points..*/) { curvePath(arguments, 0, 0); },
-        closedcurve: function closedcurve (/*..points..*/) { curvePath(arguments, 1, 0); },
-        filledcurve: function filledcurve (/*..points..*/) { curvePath(arguments, 1, 1); },
-        path:        function path        (/*..points..*/) { mixedPath(arguments, 0, 0); },
-        closedpath:  function closedpath  (/*..points..*/) { mixedPath(arguments, 1, 0); },
-        filledpath:  function filledpath  (/*..points..*/) { mixedPath(arguments, 1, 1); },
-        circle:      function circle      (x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 0, 0); },
-        filledcircle:function filledcircle(x, y, r      ) { _arc(x, y, r,     0 ,     2*Math.PI , 1, 1, 0); },
-        arc:         function arc         (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 0, 0, 0); },
-        closedarc:   function closedarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 0, 0); },
-        filledarc:   function filledarc   (x, y, r, s, e) { _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1, 0); },
-        rect:        function rect        (x, y, w, h) { ctx.strokeRect(xof(x+0.5, w-1), yof(y+0.5, h-1), w-1, h-1); },
-        filledrect:  function filledrect  (x, y, w, h) { ctx.fillRect  (xof(x,     w  ), yof(y,     h  ), w,   h  ); },
-        clear:       function clear       (x, y, w, h) { ctx.clearRect (xof(x,     w  ), yof(y,     h  ), w  , h  ); },
-        text:        function text        (t, x, y, w, c) {
-            c = arguments[arguments.length - 1];
-            _text(t, x, y, w, (typeof c === 'object' && c), true);
-        },
-        clip:        function clip        (x, y, w, h /*..content..*/) {
-            var x2 = x + w;
-            var y2 = y + h;
+    let ops = {
+        line:         (    ...points) => linePath (points, 0, 0),
+        closedline:   (    ...points) => linePath (points, 1, 0),
+        filledline:   (    ...points) => linePath (points, 1, 1),
+        curve:        (    ...points) => curvePath(points, 0, 0),
+        closedcurve:  (    ...points) => curvePath(points, 1, 0),
+        filledcurve:  (    ...points) => curvePath(points, 1, 1),
+        path:         (    ...points) => mixedPath(points, 0, 0),
+        closedpath:   (    ...points) => mixedPath(points, 1, 0),
+        filledpath:   (    ...points) => mixedPath(points, 1, 1),
+        circle:       (x, y, r      ) => _arc(x, y, r,     0 ,     2*Math.PI , 1, 0, 0),
+        filledcircle: (x, y, r      ) => _arc(x, y, r,     0 ,     2*Math.PI , 1, 1, 0),
+        arc:          (x, y, r, s, e) => _arc(x, y, r, (s||0), (e||2*Math.PI), 0, 0, 0),
+        closedarc:    (x, y, r, s, e) => _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 0, 0),
+        filledarc:    (x, y, r, s, e) => _arc(x, y, r, (s||0), (e||2*Math.PI), 1, 1, 0),
+        rect:         (x, y, w, h   ) => ctx.strokeRect(xOf(x+0.5, w-1), yOf(y+0.5, h-1), w-1, h-1),
+        filledrect:   (x, y, w, h   ) => ctx.fillRect  (xOf(x,     w  ), yOf(y,     h  ), w,   h  ),
+        clear:        (x, y, w, h   ) => ctx.clearRect (xOf(x,     w  ), yOf(y,     h  ), w  , h  ),
+        text:         (t, x, y, w, c) => _text(t, x, y, w, arguments[arguments.length - 1], true),
+        clip:         (x, y, w, h, ...content) => {
+            let x2 = x + w;
+            let y2 = y + h;
             if (clips.length > 0) {
-                var c = clips[clips.length - 1];
+                let c = clips[clips.length - 1];
                 if (x >= c.x2 || c.x >= x2 || y >= c.y2 || c.y >= y2) { return; }
                 x = Math.max(x, c.x); x2 = Math.min(x2, c.x2); w = x2 - x;
                 y = Math.max(y, c.y); y2 = Math.min(y2, c.y2); h = y2 - y;
             }
             ctx.save();
-            ctx.rect(xof(x), yof(y), w, h);
+            ctx.rect(xOf(x), yOf(y), w, h);
             ctx.clip();
             clips.push({ x:x, y:y, x2:x2, y2:y2 });
-            renderContent([].slice.call(arguments, 4));
+            renderContent(content);
             clips.pop();
             ctx.restore();
         }
     };
 
-    function xof(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
-    function yof(y, h) { return originY + dy * (dy > 0 ? y : y + (h||0)); }
-    function aof(a) { var va = (dy > 0 ? a : -a); return (dx > 0 ? va : Math.PI - va); }
+    function xOf(x, w) { return originX + dx * (dx > 0 ? x : x + (w||0)); }
+    function yOf(y, h) { return originY + dy * (dy > 0 ? y : y + (h||0)); }
+    function angOf (a) { let va = (dy > 0 ? a : -a); return (dx > 0) ? va : Math.PI - va; }
 
     function setFont(config) {
-        config = Object.assign({}, textConfig, (config || {}));
-        var s = config.size; s = /^\d+$/.test(s) ? s+'px' : String(s);
-        ctx.font = s + ' ' + config.font;
-        ctx.textAlign = config.align;
+        config = (type(config) === 'object') ? Object.assign({}, textConfig, config) : textConfig;
+        let s = config.size; s = /^\d+$/.test(s) ? s+'px' : String(s);
+        ctx.font = s+' ' + config.font;
+        ctx.textAlign    = config.align;
         ctx.textBaseline = config.baseline;
-        ctx.direction = config.direction;
+        ctx.direction    = config.direction;
     }
 
     function linePath(args, close, fill) {
-        var d = (fill ? 0 : 0.5);
-        ctx.moveTo(xof(args[0]+d), yof(args[1]+d));
-        for(var i = 2; i < args.length - 1; i += 2) { ctx.lineTo(xof(args[i]+d), yof(args[i+1]+d)); }
+        let d  = (fill ? 0 : 0.5);
+        let xs = args.filter((a, i) => i % 2 === 0).map(x => xOf(x) + d);
+        let ys = args.filter((a, i) => i % 2 === 1).map(y => yOf(y) + d);
+        ys.map((y, i) => ctx[i < 1 ? 'moveTo' : 'lineTo'](xs[i], y));
         if (close) { ctx.closePath(); }
         ctx[fill ? 'fill' : 'stroke']();
     }
 
     function curvePath(args, close, fill) {
-        var d = (fill ? 0 : 0.5);
-        ctx.moveTo(xof(args[0]+d), yof(args[1]+d));
+        let d = (fill ? 0 : 0.5);
+        ctx.moveTo(xOf(args[0]+d), yOf(args[1]+d));
         if (args.length < 6) {
-            ctx.lineTo(xof(args[2]+d), yof(args[3]+d));
+            ctx.lineTo(xOf(args[2]+d), yOf(args[3]+d));
         } else if (args.length > 6 && args.length < 10) {
-            ctx.bezierCurveTo(xof(args[2]+d), yof(args[3]+d), xof(args[4]+d), yof(args[5]+d), xof(args[6]+d), yof(args[7]+d));
-        } else for(var i = 2; i < args.length - 3; i += 4) {
-            ctx.quadraticCurveTo(xof(args[i]+d), yof(args[i+1]+d), xof(args[i+2]+d), yof(args[i+3]+d));
+            ctx.bezierCurveTo(xOf(args[2]+d), yOf(args[3]+d), xOf(args[4]+d), yOf(args[5]+d), xOf(args[6]+d), yOf(args[7]+d));
+        } else for(let i = 2; i < args.length - 3; i += 4) {
+            ctx.quadraticCurveTo(xOf(args[i]+d), yOf(args[i+1]+d), xOf(args[i+2]+d), yOf(args[i+3]+d));
         }
         if (close) {
             // If there is one extra control-point, then *curve* back to the starting point. Otherwise just close the path:
-            if (i < args.length - 1) { ctx.quadraticCurveTo(xof(args[i]+d), yof(args[i+1]+d), xof(args[0]+d), yof(args[1]+d)); }
+            if (i < args.length - 1) { ctx.quadraticCurveTo(xOf(args[i]+d), yOf(args[i+1]+d), xOf(args[0]+d), yOf(args[1]+d)); }
             else { ctx.closePath(); }
         }
         ctx[fill ? 'fill' : 'stroke']();
     }
 
     function _text(t, x, y, w, c, fill) {
-        var d = (fill ? 0 : 0.5);
+        let d = (fill ? 0 : 0.5);
         setFont(c);
-        if (typeof w === 'number') { ctx[fill ? 'fillText' : 'strokeText'](t, x, y, w); }
-        else /*******************/ { ctx[fill ? 'fillText' : 'strokeText'](t, x, y); }
+        if (type(w) === 'number') { ctx[fill ? 'fillText' : 'strokeText'](t, x, y, w); }
+        else /******************/ { ctx[fill ? 'fillText' : 'strokeText'](t, x, y); }
     }
 
     function _arc(x, y, r, s, e, close, fill, path) {
-        var d = (fill ? 0 : 0.5);
-        ctx.arc(xof(x+d), yof(y+d), r, aof(s), aof(e), (dx * dy * (path || 1)) < 0);
+        let d = (fill ? 0 : 0.5);
+        ctx.arc(xOf(x+d), yOf(y+d), r, angOf(s), angOf(e), (dx * dy * (path || 1)) < 0);
         if (close) { ctx.closePath(); }
         if (!path) { ctx[fill ? 'fill' : 'stroke'](); }
     }
 
     function arcTo(x0, y0, cx, cy, a, fill) {
-        var x = x0 - cx;
-        var y = y0 - cy;
-        var r = Math.sqrt(x*x + y*y);
-        var s = Math.atan2(y, x);
+        let x = x0 - cx;
+        let y = y0 - cy;
+        let r = Math.sqrt(x*x + y*y);
+        let s = Math.atan2(y, x);
         _arc(cx, cy, r, s, s+a, 0, fill, (a > 0 ? 1 : -1));
     }
 
     function mixedPath(args, close, fill) {
-        var d = (fill ? 0 : 0.5);
-        var prevX = args[0];
-        var prevY = args[1];
-        ctx.moveTo(xof(args[0]+d), yof(args[1]+d));
-        for(var i = 2; i < args.length; i++) {
-            var p = args[i];
-            if /**/ (p.length < 3) { ctx.lineTo/*********/(xof(p[0]+d), yof(p[1]+d)); }
+        let d = (fill ? 0 : 0.5);
+        let prevX = args[0];
+        let prevY = args[1];
+        ctx.moveTo(xOf(args[0]+d), yOf(args[1]+d));
+        args.map(p => {
+            if /**/ (p.length < 3) { ctx.lineTo/*********/(xOf(p[0]+d), yOf(p[1]+d)); }
             if /**/ (p.length < 4) { arcTo(prevX, prevY, p[0], p[1], p[2], fill); }
-            else if (p.length < 6) { ctx.quadraticCurveTo (xof(p[0]+d), yof(p[1]+d), xof(p[2]+d), yof(p[3]+d)); }
-            else /***************/ { ctx.bezierCurveTo/**/(xof(p[0]+d), yof(p[1]+d), xof(p[2]+d), yof(p[3]+d), xof(p[4]+d), yof(p[5]+d)); }
+            else if (p.length < 6) { ctx.quadraticCurveTo (xOf(p[0]+d), yOf(p[1]+d), xOf(p[2]+d), yOf(p[3]+d)); }
+            else /***************/ { ctx.bezierCurveTo/**/(xOf(p[0]+d), yOf(p[1]+d), xOf(p[2]+d), yOf(p[3]+d), xOf(p[4]+d), yOf(p[5]+d)); }
             prevX = p[p.length - 2];
             prevY = p[p.length - 1];
-        }
+        });
         if (close) { ctx.closePath(); }
         ctx[fill ? 'fill' : 'stroke']();
     }
@@ -180,29 +181,26 @@ function Renderer(config, width, height, textConfig) {
 
     function renderContent(content) {
         content.map(c => {
-            var data = c || ['noop'];
-            var ids = ('' + (data[0] || '')).toLowerCase().split(' ');
-            var filled = false, closed = false, color = null;
-            var op = null, fop = null, cop = null;
-
-            for(var i = 0; i < ids.length; i++) {
-                var id = ids[i];
-                var o  = ops[id];
-                var fo = ops['filled'+id];
-                var co = ops['closed'+id];
-                var fd = (id === 'filled');
-                var cd = (id === 'closed');
+            let data = c || ['noop'];
+            let ids = ('' + (data[0] || '')).toLowerCase().split(' ');
+            let filled = false, closed = false, color = null;
+            let op = null, fop = null, cop = null;
+            ids.map(id => {
+                let o  = ops[id];
+                let fo = ops['filled'+id];
+                let co = ops['closed'+id];
+                let fd = (id === 'filled');
+                let cd = (id === 'closed');
                 op     = (op     || o);
                 fop    = (fop    || fo);
                 cop    = (cop    || co);
                 filled = (filled || fd);
                 closed = (closed || cd);
                 color  = (color  || (!o && !fo && !co && !fd && !cd && id));
-            }
-
+            });
             op = (filled && fop) || (closed && cop) || op;
             if (op) {
-                var args = data.slice(1);
+                let args = data.slice(1);
                 ctx.fillStyle   = (color || defColor);
                 ctx.strokeStyle = (color || defColor);
                 ctx.beginPath();
@@ -217,7 +215,7 @@ function Renderer(config, width, height, textConfig) {
         canvas.width = canvas.width;
         ctx.clearRect(0, 0, buffer.width, buffer.height);
         renderContent(content);
-        requestAnimationFrame(function renderBuffer() {
+        requestAnimationFrame(() => {
             outerCtx.clearRect(0, 0, canvas.width, canvas.height);
             outerCtx.drawImage(buffer, 0, 0);
         });
@@ -247,45 +245,45 @@ function Renderer(config, width, height, textConfig) {
 
     // ---- Event Handlers ----
 
-    var events = {};
-    var keysDown = {};
-    var prevMouse = null;
-    var lastClicked = null;
-    var clickTimer = null;
-    var clickTimeout = 0;
-    var pressed = false;
-    var dragged = false;
-    var clicks = 0;
+    let events = {};
+    let keysDown = {};
+    let prevMouse = null;
+    let lastClicked = null;
+    let clickTimer = null;
+    let clickTimeout = 0;
+    let pressed = false;
+    let dragged = false;
+    let clicks = 0;
 
     function on(name, f) {
         window.addEventListener(name, e => f(e || window.event), false);
     }
 
     function getMouseCoords(e) {
-        var r = canvas.getBoundingClientRect();
-        var w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
-        var h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
-        var x = xof(e.clientX - r.left - w);
-        var y = yof(e.clientY - r.top  - h);
+        let r = canvas.getBoundingClientRect();
+        let w = parseInt((canvas.currentStyle || canvas.style).borderLeftWidth) || 0;
+        let h = parseInt((canvas.currentStyle || canvas.style).borderTopWidth ) || 0;
+        let x = xOf(e.clientX - r.left - w);
+        let y = yOf(e.clientY - r.top  - h);
         return (x >= 0 && x < canvas.width && y >= 0 && y < canvas.height) ? { x: x, y: y} : null;
     }
 
-    on('keyup',   function keyup  (e) {
+    on('keyup', (e) => {
         if (events.keyup && lastClicked === canvas) {
             events.keyup(e.keyCode);
         }
         keysDown[e.keyCode] = false;
     });
 
-    on('keydown', function keydown(e) {
+    on('keydown', (e) => {
         if (events.keydown && lastClicked === canvas && !keysDown[e.keyCode]) {
             events.keydown(e.keyCode);
         }
         keysDown[e.keyCode] = true;
     });
 
-    on('mousedown', function mousedown(e) {
-        var m = getMouseCoords(e);
+    on('mousedown', (e) => {
+        let m = getMouseCoords(e);
         if (m && events.mousedown) {
             events.mousedown(m.x, m.y);
         }
@@ -293,8 +291,8 @@ function Renderer(config, width, height, textConfig) {
         pressed = true;
     });
 
-    on('mouseup', function mouseup(e) {
-        var m = getMouseCoords(e);
+    on('mouseup', (e) => {
+        let m = getMouseCoords(e);
         if (m && events.mouseup) {
             events.mouseup(m.x, m.y);
         }
@@ -312,10 +310,10 @@ function Renderer(config, width, height, textConfig) {
         pressed = false;
     });
 
-    on('mousemove', function mousemove(e) {
-        var m = getMouseCoords(e);
+    on('mousemove', (e) => {
+        let m = getMouseCoords(e);
         if (m && events.mousedrag) {
-            var p = prevMouse || m;
+            let p = prevMouse || m;
             events.mousemove(m.x, m.y, p.x, p.y);
             if (pressed) {
                 events.mousedrag(m.x, m.y, p.x, p.y);
@@ -329,31 +327,23 @@ function Renderer(config, width, height, textConfig) {
     renderFrame();
 
     return {
-        getCanvas: function getCanvas() {
-            return canvas;
-        },
-        render: function render(c) {
-            if (arguments.length > 0) {
-                if (!Array.isArray(c)) { var c2 = []; c2.push.apply(c2, arguments); c = c2; }
-                content = Array.isArray(c[0]) ? c : [c];
-            }
+        render: (...items) => {
+            content = (items.length < 1) ? content : (type(items[0]) === 'array') ? items : [items];
             renderFrame();
         },
-        resize: resizeCanvas,
-        fillWindow: fillWindow,
-        fitToWindow: fitToWindow,
-        textWidth: function textWidth(text, config) {
-            setFont(config);
-            return ctx.measureText(text).width || 0;
-        },
-        onKeyUp:      function onKeyUp     (f) { events.keyup     = f; },
-        onKeyDown:    function onKeyDown   (f) { events.keydown   = f; },
-        onMouseUp:    function onMouseUp   (f) { events.mouseup   = f; },
-        onMouseDown:  function onMouseDown (f) { events.mousedown = f; },
-        onMouseMove:  function onMouseMove (f) { events.mousemove = f; },
-        onMouseDrag:  function onMouseDrag (f) { events.mousedrag = f; },
-        onMouseClick: function onMouseClick(f, timeout) {
-            if (arguments.length > 1) { clickTimeout = timeout; }
+        resize      : resizeCanvas,
+        fillWindow  : fillWindow,
+        fitToWindow : fitToWindow,
+        textWidth   : (text, config) => setFont(config) || ctx.measureText(text).width || 0,
+        getCanvas   : ( ) => canvas,
+        onKeyUp     : (f) => events.keyup     = f,
+        onKeyDown   : (f) => events.keydown   = f,
+        onMouseUp   : (f) => events.mouseup   = f,
+        onMouseDown : (f) => events.mousedown = f,
+        onMouseMove : (f) => events.mousemove = f,
+        onMouseDrag : (f) => events.mousedrag = f,
+        onMouseClick: (f, timeout) => {
+            if (type(timeout) === 'number') { clickTimeout = timeout; }
             events.mouseclick = f;
         }
     };
@@ -361,13 +351,13 @@ function Renderer(config, width, height, textConfig) {
 
 /*
 // ---- EVENTS DEMO ----
-var ui = Renderer('top left');
+let ui = Renderer('top left');
 ui.fitToWindow();
-ui.onMouseMove((x, y, px, py) => ui.render([['red circle', px, py, 12],['blue circle', x, y, 10]]));
-ui.onMouseDrag((x, y, px, py) => ui.render([['filled red circle', px, py, 12],['filled blue circle', x, y, 10]]));
-ui.onMouseDown((x, y) => ui.render([['filled blue rect', x-10, y-10, 20, 20]]));
-ui.onMouseUp  ((x, y) => ui.render([['blue rect', x-10, y-10, 20, 20]]));
-ui.onMouseClick((x, y, clicks) => ui.render([['red rect', x-12-clicks*clicks, y-12-clicks*clicks, 24+2*clicks*clicks, 24+2*clicks*clicks]]), 250);
+ui.onMouseMove((x, y, px, py) => ui.render(['red circle', px, py, 12],['blue circle', x, y, 10]));
+ui.onMouseDrag((x, y, px, py) => ui.render(['filled red circle', px, py, 12],['filled blue circle', x, y, 10]));
+ui.onMouseDown((x, y) => ui.render(['filled blue rect', x-10, y-10, 20, 20]));
+ui.onMouseUp  ((x, y) => ui.render(['blue rect', x-10, y-10, 20, 20]));
+ui.onMouseClick((x, y, clicks) => ui.render(['red rect', x-12-clicks*clicks, y-12-clicks*clicks, 24+2*clicks*clicks, 24+2*clicks*clicks]), 250);
 ui.onKeyDown(k => console.log("DOWN: " + k ));
 ui.onKeyUp  (k => console.log("UP  : " + k ));
 */
