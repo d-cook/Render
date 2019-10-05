@@ -312,10 +312,12 @@ function Renderer(config, width, height, textConfig) {
 
     on('mousemove', (e) => {
         let m = getMouseCoords(e);
-        if (m && events.mousedrag) {
+        if (m && (events.mousedrag || events.mousemove)) {
             let p = prevMouse || m;
-            events.mousemove(m.x, m.y, p.x, p.y);
-            if (pressed) {
+            if (events.mousemove) {
+                events.mousemove(m.x, m.y, p.x, p.y);
+            }
+            if (events.mousedrag && pressed) {
                 events.mousedrag(m.x, m.y, p.x, p.y);
             }
             prevMouse = m;
